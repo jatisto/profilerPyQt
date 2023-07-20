@@ -1,9 +1,11 @@
 import psycopg2
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
-    QLabel, QLineEdit, QComboBox, QDialog, QTextEdit, QFrame, QAction, QShortcut
+    QLabel, QLineEdit, QComboBox, QDialog, QTextEdit, QFrame, QAction, QShortcut, QApplication
 from PyQt5.QtCore import Qt
 
+import logging
+import datetime
 
 from database import DatabaseManager
 from settings import ConnectionSettings
@@ -12,6 +14,7 @@ from settings import ConnectionSettings
 class QueryApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        logging.info(f"Start {datetime.datetime.now()}")
         self.setWindowTitle("Query Viewer")
         self.setGeometry(100, 100, 1200, 800)
 
@@ -188,16 +191,19 @@ class QueryApp(QMainWindow):
     def keyPressEvent(self, event):
 
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
-            # Handle the Ctrl + F key press here
             self.line_edit_search.setFocus()
+        elif event.modifiers() == Qt.ShiftModifier and event.key() == Qt.Key_Return:
+            selected_row = self.table_widget_results.currentRow()
+            selected_column = self.table_widget_results.currentColumn()
+            if selected_column == 0:
+                self.view_full_query(selected_row, selected_column)
+        elif event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_Q:
+            QApplication.quit()
         elif event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_L:
-            # Handle the Ctrl + L key press here
             self.combo_dbname.setFocus()
         elif event.key() == Qt.Key_Escape:
-            # Pressing the "Escape" key will clear the focus from the database list
             self.combo_dbname.clearFocus()
 
-        # Call the parent class method to handle other key events
         super().keyPressEvent(event)
 
     def reset_stats(self):

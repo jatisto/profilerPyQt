@@ -2,7 +2,7 @@ import cProfile
 import os
 import sys
 import logging
-
+from utility_function import handle_errors, write_log
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 from ui import QueryApp
@@ -18,6 +18,7 @@ def setup_logging():
                         format="%(asctime)s [%(levelname)s]: %(message)s")
 
 
+@handle_errors(log_file="errors.log", text='main')
 def main():
     os.environ["QT_QPA_PLATFORMTHEME"] = "qt5ct"
     app = QApplication(sys.argv)

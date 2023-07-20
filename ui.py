@@ -9,12 +9,14 @@ import datetime
 
 from database import DatabaseManager
 from settings import ConnectionSettings
+from utility_function import handle_errors, write_log
 
 
+@handle_errors(log_file="ui.log", text='QueryApp')
 class QueryApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        logging.info(f"Start {datetime.datetime.now()}")
+        write_log(f"Start")
         self.setWindowTitle("Query Viewer")
         self.setGeometry(100, 100, 1200, 800)
 
@@ -260,10 +262,12 @@ class QueryApp(QMainWindow):
 
         try:
             results = self.db_connection.execute_query(query)
+            results = self.removing_line_breaks(results)
             self.display_results(results)
             self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
+            write_log(f"Ошибка выполнения запроса: {e}")
 
     def search_query(self):
         if not self.db_connection:
@@ -286,10 +290,20 @@ class QueryApp(QMainWindow):
 
         try:
             results = self.db_connection.execute_query(query)
+            results = self.removing_line_breaks(results)
             self.display_results(results)
             self.statusBar().showMessage("Поиск выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения поиска: {e}")
+            write_log(f"Ошибка выполнения запроса: {e}")
+
+    @staticmethod
+    def removing_line_breaks(results):
+        results = [list(row) for row in results]
+        for row in results:
+            row[0] = row[0].replace('\n', '')
+        results = [tuple(row) for row in results]
+        return results
 
     def display_results(self, results):
         # Display results in the table
@@ -357,6 +371,7 @@ class QueryApp(QMainWindow):
             self.statusBar().showMessage("Настройки успешно сохранены.")
         else:
             self.statusBar().showMessage("Ошибка при сохранении настроек.")
+            write_log(f"Ошибка при сохранении настроек")
 
     def on_database_changed(self, index):
         selected_db = self.combo_dbname.currentText()

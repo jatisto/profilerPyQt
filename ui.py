@@ -1,7 +1,9 @@
+import re
+
 import psycopg2
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QIcon
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
-    QLabel, QLineEdit, QComboBox, QDialog, QTextEdit, QFrame, QAction, QShortcut, QApplication
+    QLabel, QLineEdit, QComboBox, QDialog, QTextEdit, QFrame, QAction, QShortcut, QApplication, QSystemTrayIcon, QMenu
 from PyQt5.QtCore import Qt
 
 import logging
@@ -16,6 +18,10 @@ from utility_function import handle_errors, write_log
 class QueryApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.exit_action = None
+        self.show_action = None
+        self.tray_menu = None
+        self.tray_icon = None
         write_log(f"Start")
         self.setWindowTitle("Query Viewer")
         self.setGeometry(100, 100, 1200, 800)
@@ -35,6 +41,31 @@ class QueryApp(QMainWindow):
     def init_ui(self):
         layout = QVBoxLayout()
         self.set_dark_theme(self.dark_theme_enabled)
+
+        icon_path = "icons/icon.ico"
+        self.setWindowIcon(QIcon(icon_path))
+
+        # Создание системного трея
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon(icon_path))
+
+        # Создание контекстного меню для трея
+        self.tray_menu = QMenu(self)
+        self.show_action = QAction("Показать окно", self)
+        self.exit_action = QAction("Выход", self)
+        self.tray_menu.addAction(self.show_action)
+        self.tray_menu.addAction(self.exit_action)
+
+        # Установка контекстного меню для трея
+        self.tray_icon.setContextMenu(self.tray_menu)
+
+        # Показать/скрыть главное окно приложения при нажатии на иконку в трее
+        self.show_action.triggered.connect(self.show)
+        self.tray_icon.activated.connect(self.tray_icon_clicked)
+
+        # Отображение иконки в трее
+        self.tray_icon.show()  # Добавьте эту строку
+
 
         # Fields for connection settings
         self.line_edit_host = QLineEdit(self)
@@ -299,9 +330,13 @@ class QueryApp(QMainWindow):
 
     @staticmethod
     def removing_line_breaks(results):
+        def replace_line_breaks(text):
+            # Заменяем переносы строк и табуляции на пробелы
+            return re.sub(r"[\n\t]+", " ", text)
+
         results = [list(row) for row in results]
         for row in results:
-            row[0] = row[0].replace('\n', '')
+            row[0] = replace_line_breaks(row[0])
         results = [tuple(row) for row in results]
         return results
 
@@ -381,3 +416,23 @@ class QueryApp(QMainWindow):
     def clear_table_results(self):
         self.table_widget_results.clearContents()
         self.table_widget_results.setRowCount(0)
+
+    def tray_icon_clicked(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.show()
+
+    def closeEvent(self, event):
+        event.ignore()
+        self.hide()
+        self.show_system_menu(self.mapToGlobal(self.geometry().topRight()))
+
+    def show_system_menu(self, pos):
+        menu = QMenu(self)
+        show_action = menu.addAction("Показать окно")
+        exit_action = menu.addAction("Выход")
+
+        action = menu.exec_(pos)
+        if action == show_action:
+            self.show()
+        elif action == exit_action:
+            QApplication.quit()

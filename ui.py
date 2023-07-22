@@ -215,16 +215,12 @@ class QueryApp(QMainWindow):
         set_button_color(self.btn_pg_stat_reset, QColor(97, 175, 239), "color: black;")  # Blue
         set_button_color(self.btn_execute_query_opr, QColor(97, 175, 239), "color: black;")  # Blue
 
-        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
         # Отрегулируйте расположение кнопок для лучшего использования пространства
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btn_reconnect_to_db)
-        btn_layout.addItem(spacer)
         btn_layout.addWidget(self.btn_reset_stats)
         btn_layout.addWidget(self.btn_pg_stat_reset)
         btn_layout.addWidget(self.btn_execute_query_opr)
-        btn_layout.addItem(spacer)
         btn_layout.addWidget(self.btn_execute_query)
         btn_layout.addStretch()
 

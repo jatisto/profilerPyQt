@@ -29,7 +29,7 @@ QLineEdit, QTextEdit, QPlainTextEdit
 
 QLineEdit:focus, QLineEdit:hover, QTextEdit:hover, QPlainTextEdit:hover
 {
-    border-color: rgb(100, 100, 100);
+    border-color: rgb(40, 44, 52);
 }
 
 QTextEdit:focus, QPlainTextEdit:focus

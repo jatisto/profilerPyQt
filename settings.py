@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 
@@ -33,6 +34,5 @@ class ConnectionSettings:
                 json.dump(existing_settings, json_file, indent=4)
             return True
         except Exception as e:
-            # Handle the error and return False to indicate settings save failure
-            # You may also add logging for the error
+            logging.Formatter(f"{e}")
             return False

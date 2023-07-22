@@ -1,4 +1,7 @@
+from aifc import Error
+
 import psycopg2
+from psycopg2 import extensions
 
 
 class DatabaseManager:

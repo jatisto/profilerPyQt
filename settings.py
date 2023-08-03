@@ -4,6 +4,7 @@ import json
 
 
 class ConnectionSettings:
+
     @staticmethod
     def load():
         try:
@@ -15,17 +16,31 @@ class ConnectionSettings:
             return []
 
     @staticmethod
+    def load_all_settings():
+        try:
+            with open("settings.json", "r") as json_file:
+                return json.load(json_file)["setting"]
+        except FileNotFoundError:
+            return []
+
+    @staticmethod
     def save(new_settings):
         try:
             if os.path.exists("settings.json"):
                 with open("settings.json", "r") as json_file:
                     existing_settings = json.load(json_file)
+                    found_matching = False
+
                     for setting in existing_settings["setting"]:
-                        if setting["dbname"] == new_settings["setting"][0]["dbname"] and setting["port"] == \
-                                new_settings["setting"][0]["port"]:
+                        if (setting["dbname"] == new_settings["setting"][0]["dbname"] and
+                                setting["port"] == new_settings["setting"][0]["port"] and
+                                setting["host"] == new_settings["setting"][0]["host"]):
                             setting["actual"] = True
-                            break
-                    else:
+                            found_matching = True
+                        else:
+                            setting["actual"] = False  # Сбросить флаг actual для остальных записей
+
+                    if not found_matching:
                         existing_settings["setting"].append(new_settings["setting"][0])
             else:
                 existing_settings = new_settings

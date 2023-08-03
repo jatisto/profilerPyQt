@@ -1,11 +1,9 @@
 import re
-from aifc import Error
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
-    QLineEdit, QComboBox, QDialog, QTextEdit, QFrame, QAction, QApplication, QSystemTrayIcon, QMenu, QHeaderView, \
-    QSpacerItem, QSizePolicy
+    QLineEdit, QComboBox, QTextEdit, QFrame, QAction, QApplication, QSystemTrayIcon, QMenu
 
 import Constants
 from database import DatabaseManager
@@ -22,6 +20,10 @@ def set_button_color(button, color, text_color='color: white;', font_family='Mes
 class QueryApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.use_custom_query = None
+        self.btn_reconnect_to_db = None
+        self.btn_pg_stat_reset = None
+        self.btn_execute_query_opr = None
         self.highlighter = None
         self.text_edit_full_query = None
         self.btn_execute_custom_query = None
@@ -50,13 +52,16 @@ class QueryApp(QMainWindow):
 
         self.db_connection = None
         self.dark_theme_enabled = False
-        self.default_dbname = "absolutBank_dev2_Actual"
-        self.default_host = "localhost"
-        self.default_port = "5432"
-        self.default_username = "postgres"
-        self.default_password = "123456"
 
+        self.default_dbname = None
+        self.default_host = None
+        self.default_port = None
+        self.default_username = None
+        self.default_password = None
+
+        self.load_default_connection_settings()
         self.init_ui()
+
         self.load_connection_settings()
         self.connect_to_db()
 
@@ -106,18 +111,18 @@ class QueryApp(QMainWindow):
         self.line_edit_password.setEchoMode(QLineEdit.Password)
         self.line_edit_password.setText(self.default_password)
 
-        # Combo box for database selection
+        # Поле со списком для выбора базы данных
         self.combo_dbname = QComboBox(self)
         self.combo_dbname.setEditable(True)
         self.combo_dbname.setPlaceholderText("DATABASE NAME")
         self.combo_dbname.setCurrentText(self.default_dbname)
         self.combo_dbname.currentIndexChanged.connect(self.on_database_changed)
 
-        # Search field
+        # Поле поиска
         self.line_edit_search = QLineEdit(self)
         self.line_edit_search.setPlaceholderText("SEARCH BY QUERY")
 
-        # Add a frame to enhance the visual appearance of the search field
+        # Добавьте рамку, чтобы улучшить внешний вид поля поиска.
         search_frame = QFrame(self)
         search_frame.setFrameShape(QFrame.StyledPanel)
         search_frame.setFrameShadow(QFrame.Raised)
@@ -126,10 +131,10 @@ class QueryApp(QMainWindow):
         search_layout.addWidget(self.line_edit_search, 1)
         search_layout.setContentsMargins(5, 5, 5, 5)
 
-        # Initialize the table widget for displaying query results
+        # Инициализировать виджет таблицы для отображения результатов запроса
         layout.addWidget(self.combo_dbname)
 
-        # Table widget for data display
+        # Виджет таблицы для отображения данных
         self.table_widget_results = QTableWidget(self)
         self.table_widget_results.setColumnCount(5)
 
@@ -137,7 +142,6 @@ class QueryApp(QMainWindow):
             ["QUERY", "ROWS", "CALLS", "QUERY_START", "BACKEND_START"]
         )
         self.table_widget_results.setSortingEnabled(True)
-        # self.table_widget_results.cellDoubleClicked.connect(self.view_full_query)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
 
         layout.addWidget(self.table_widget_results)
@@ -208,7 +212,7 @@ class QueryApp(QMainWindow):
 
         self.layout.addLayout(table_layout)
 
-        # Set colors using the set_button_color function
+        # Установите цвета с помощью функции set_button_color
         set_button_color(self.btn_reconnect_to_db, QColor(204, 36, 29))  # Red
         set_button_color(self.btn_execute_query, QColor(152, 195, 121), "color: black;")  # Green
         set_button_color(self.btn_reset_stats, QColor(97, 175, 239), "color: black;")  # Blue
@@ -224,13 +228,13 @@ class QueryApp(QMainWindow):
         btn_layout.addWidget(self.btn_execute_query)
         btn_layout.addStretch()
 
-        # Inside the init_ui method, modify the creation of the QTextEdit widget to make it editable.
+        # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
         self.text_edit_full_query = QTextEdit(self)
         self.text_edit_full_query.setFontFamily("JetBrains Mono")
         self.text_edit_full_query.setPlaceholderText("Введите ваш пользовательский запрос")
         self.layout.addWidget(self.text_edit_full_query)
 
-        # Apply syntax highlighting with the SQLHighlighter
+        # Применить подсветку синтаксиса с помощью SQLHighlighter
         highlighter = SQLHighlighter(self.text_edit_full_query.document())
 
         self.layout.addLayout(btn_layout)
@@ -244,8 +248,7 @@ class QueryApp(QMainWindow):
         self.line_edit_search.textChanged.connect(self.search_query)
         # Подключите сигнал currentCellChanged к методу view_full_query.
         self.table_widget_results.currentCellChanged.connect(self.view_full_query)
-        # self.btn_execute_query_opr.clicked.connect(self.execute_custom_query)
-        # Assign the highlighter instance to the member variable for later access
+        # Назначьте экземпляр маркера переменной-члену для последующего доступа
         self.highlighter = highlighter
 
     def set_dark_theme(self, enabled):
@@ -255,8 +258,8 @@ class QueryApp(QMainWindow):
             try:
                 with open("themes/{}.qss".format(theme), "r") as theme_file:
                     self.setStyleSheet(theme_file.read())
-            except:
-                print("Error: Couldn't open the file.")
+            except Exception as err:
+                print(f"Error: Couldn't open the file. {err}")
         else:
             self.setStyleSheet("")
 
@@ -303,10 +306,11 @@ class QueryApp(QMainWindow):
 
         query = "SELECT pg_stat_statements_reset();"
         try:
-            results = self.db_connection.execute_query(query)
-            self.display_results(results)
-            self.statusBar().showMessage("Сброс статистики прошёл успешно.")
-            self.reconnect_to_db()
+            with self.db_connection:
+                results = self.db_connection.execute_query(query)
+                self.display_results(results)
+                self.statusBar().showMessage("Сброс статистики прошёл успешно.")
+                self.reconnect_to_db()
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
 
@@ -317,10 +321,11 @@ class QueryApp(QMainWindow):
 
         query = "SELECT pg_stat_reset();"
         try:
-            results = self.db_connection.execute_query(query)
-            self.display_results(results)
-            self.statusBar().showMessage("Сброс статистики прошёл успешно.")
-            self.reconnect_to_db()
+            with self.db_connection:
+                results = self.db_connection.execute_query(query)
+                self.display_results(results)
+                self.statusBar().showMessage("Сброс статистики прошёл успешно.")
+                self.reconnect_to_db()
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
 
@@ -331,12 +336,12 @@ class QueryApp(QMainWindow):
         username = self.line_edit_username.text()
         password = self.line_edit_password.text()
 
-        self.db_connection = DatabaseManager(dbname, host, port, username, password)
-        if self.db_connection.connect():
-            self.statusBar().showMessage("Подключение успешно")
-            self.btn_disconnect.setEnabled(True)
-        else:
-            self.statusBar().showMessage("Ошибка подключения")
+        with DatabaseManager(dbname, host, port, username, password) as self.db_connection:
+            if self.db_connection.connect():
+                self.statusBar().showMessage("Подключение успешно")
+                self.btn_disconnect.setEnabled(True)
+            else:
+                self.statusBar().showMessage("Ошибка подключения")
 
     def disconnect_from_db(self):
         if self.db_connection:
@@ -356,9 +361,10 @@ class QueryApp(QMainWindow):
         query = Constants.get_execute_query(self.combo_dbname.currentText())
 
         try:
-            results = self.db_connection.execute_query(query)
-            self.display_results(results)
-            self.statusBar().showMessage("Запрос выполнен успешно.")
+            with self.db_connection:
+                results = self.db_connection.execute_query(query)
+                self.display_results(results)
+                self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
             write_log(f"Ошибка выполнения запроса: {e}")
@@ -391,9 +397,10 @@ class QueryApp(QMainWindow):
         query = query_template.format(", ".join(["'{}'".format(name) for name in table_names]))
 
         try:
-            results = self.db_connection.execute_query(query)
-            self.display_results(results)
-            self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
+            with self.db_connection:
+                results = self.db_connection.execute_query(query)
+                self.display_results(results)
+                self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
             write_log(f"Ошибка выполнения пользовательского запроса: {e}")
@@ -453,6 +460,17 @@ class QueryApp(QMainWindow):
             self.statusBar().showMessage(f"Ошибка выполнения поиска: {e}")
             write_log(f"{e}")
 
+    def load_default_connection_settings(self):
+        settings = ConnectionSettings.load_all_settings()
+
+        actual_settings = [setting for setting in settings if setting["actual"]]
+
+        self.default_dbname = actual_settings[0]["dbname"]
+        self.default_host = actual_settings[0]["host"]
+        self.default_port = actual_settings[0]["port"]
+        self.default_username = actual_settings[0]["username"]
+        self.default_password = actual_settings[0]["password"]
+
     def load_connection_settings(self):
         databases = ConnectionSettings.load()
         self.combo_dbname.addItems(databases)
@@ -494,17 +512,6 @@ class QueryApp(QMainWindow):
     def closeEvent(self, event):
         QApplication.quit()
         event.accept()
-
-    def show_system_menu(self, pos):
-        menu = QMenu(self)
-        show_action = menu.addAction("Показать окно")
-        exit_action = menu.addAction("Выход")
-
-        action = menu.exec_(pos)
-        if action == show_action:
-            self.show()
-        elif action == exit_action:
-            QApplication.quit()
 
     def reconnect_to_db(self):
         # Disconnect from the current database if connected

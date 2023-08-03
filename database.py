@@ -1,9 +1,8 @@
-from aifc import Error
-
 import psycopg2
-from psycopg2 import extensions
+from utility_function import handle_errors, write_log
 
 
+@handle_errors(log_file="db.log", text='DatabaseManager')
 class DatabaseManager:
     def __init__(self, dbname, host, port, username, password):
         self.dbname = dbname
@@ -13,6 +12,13 @@ class DatabaseManager:
         self.password = password
         self.db_connection = None
 
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.disconnect()
+
     def connect(self):
         try:
             self.db_connection = psycopg2.connect(
@@ -20,8 +26,7 @@ class DatabaseManager:
             )
             return True
         except Exception as e:
-            # Handle the error and return False to indicate connection failure
-            # You may also add logging for the error
+            write_log(f"{e}")
             return False
 
     def disconnect(self):
@@ -37,8 +42,7 @@ class DatabaseManager:
             cursor.close()
             return results
         except Exception as e:
-            # Handle the error and return an empty list to indicate query execution failure
-            # You may also add logging for the error
+            write_log(f"{e}")
             return []
 
     def reset_stats(self):
@@ -49,6 +53,5 @@ class DatabaseManager:
             self.db_connection.commit()
             return True
         except Exception as e:
-            # Handle the error and return False to indicate stat reset failure
-            # You may also add logging for the error
+            write_log(f"{e}")
             return False

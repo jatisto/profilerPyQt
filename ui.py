@@ -69,54 +69,8 @@ class QueryApp(QMainWindow):
         layout = QVBoxLayout()
         self.set_dark_theme(self.dark_theme_enabled)
 
-        icon_path = "icons/icon.ico"
-        self.setWindowIcon(QIcon(icon_path))
-
-        # Создание системного трея
-        self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon(icon_path))
-
-        # Создание контекстного меню для трея
-        self.tray_menu = QMenu(self)
-        self.show_action = QAction("Показать окно", self)
-        self.exit_action = QAction("Выход", self)
-        self.tray_menu.addAction(self.show_action)
-        self.tray_menu.addAction(self.exit_action)
-
-        # Установка контекстного меню для трея
-        self.tray_icon.setContextMenu(self.tray_menu)
-
-        # Показать/скрыть главное окно приложения при нажатии на иконку в трее
-        self.show_action.triggered.connect(self.show)
-        self.tray_icon.activated.connect(self.tray_icon_clicked)
-
-        # Отображение иконки в трее
-        self.tray_icon.show()  # Добавьте эту строку
-
-        # Поля для настроек подключения
-        self.line_edit_host = QLineEdit(self)
-        self.line_edit_host.setPlaceholderText("HOST")
-        self.line_edit_host.setText(self.default_host)
-
-        self.line_edit_port = QLineEdit(self)
-        self.line_edit_port.setPlaceholderText("PORT")
-        self.line_edit_port.setText(self.default_port)
-
-        self.line_edit_username = QLineEdit(self)
-        self.line_edit_username.setPlaceholderText("USER NAME")
-        self.line_edit_username.setText(self.default_username)
-
-        self.line_edit_password = QLineEdit(self)
-        self.line_edit_password.setPlaceholderText("PASSWORD")
-        self.line_edit_password.setEchoMode(QLineEdit.Password)
-        self.line_edit_password.setText(self.default_password)
-
-        # Поле со списком для выбора базы данных
-        self.combo_dbname = QComboBox(self)
-        self.combo_dbname.setEditable(True)
-        self.combo_dbname.setPlaceholderText("DATABASE NAME")
-        self.combo_dbname.setCurrentText(self.default_dbname)
-        self.combo_dbname.currentIndexChanged.connect(self.on_database_changed)
+        self.q_system_tray_icon_build()
+        self.setting_input_fields()
 
         # Поле поиска
         self.line_edit_search = QLineEdit(self)
@@ -143,6 +97,7 @@ class QueryApp(QMainWindow):
         )
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
+        # self.table_widget_results.horizontalHeader().sectionClicked.connect(self.handle_header_click)
 
         layout.addWidget(self.table_widget_results)
 
@@ -251,6 +206,51 @@ class QueryApp(QMainWindow):
         # Назначьте экземпляр маркера переменной-члену для последующего доступа
         self.highlighter = highlighter
 
+    # def handle_header_click(self, column_index):
+    #     self.table_widget_results.sortByColumn(column_index, Qt.DescendingOrder)
+
+    def setting_input_fields(self):
+        # Поля для настроек подключения
+        self.line_edit_host = QLineEdit(self)
+        self.line_edit_host.setPlaceholderText("HOST")
+        self.line_edit_host.setText(self.default_host)
+        self.line_edit_port = QLineEdit(self)
+        self.line_edit_port.setPlaceholderText("PORT")
+        self.line_edit_port.setText(self.default_port)
+        self.line_edit_username = QLineEdit(self)
+        self.line_edit_username.setPlaceholderText("USER NAME")
+        self.line_edit_username.setText(self.default_username)
+        self.line_edit_password = QLineEdit(self)
+        self.line_edit_password.setPlaceholderText("PASSWORD")
+        self.line_edit_password.setEchoMode(QLineEdit.Password)
+        self.line_edit_password.setText(self.default_password)
+        # Поле со списком для выбора базы данных
+        self.combo_dbname = QComboBox(self)
+        self.combo_dbname.setEditable(True)
+        self.combo_dbname.setPlaceholderText("DATABASE NAME")
+        self.combo_dbname.setCurrentText(self.default_dbname)
+        self.combo_dbname.currentIndexChanged.connect(self.on_database_changed)
+
+    def q_system_tray_icon_build(self):
+        icon_path = "icons/icon.ico"
+        self.setWindowIcon(QIcon(icon_path))
+        # Создание системного трея
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon(icon_path))
+        # Создание контекстного меню для трея
+        self.tray_menu = QMenu(self)
+        self.show_action = QAction("Показать окно", self)
+        self.exit_action = QAction("Выход", self)
+        self.tray_menu.addAction(self.show_action)
+        self.tray_menu.addAction(self.exit_action)
+        # Установка контекстного меню для трея
+        self.tray_icon.setContextMenu(self.tray_menu)
+        # Показать/скрыть главное окно приложения при нажатии на иконку в трее
+        self.show_action.triggered.connect(self.show)
+        self.tray_icon.activated.connect(self.tray_icon_clicked)
+        # Отображение иконки в трее
+        self.tray_icon.show()
+
     def set_dark_theme(self, enabled):
         self.dark_theme_enabled = enabled
         if enabled:
@@ -307,7 +307,7 @@ class QueryApp(QMainWindow):
         query = "SELECT pg_stat_statements_reset();"
         try:
             with self.db_connection:
-                results = self.db_connection.execute_query(query)
+                results = self.db_connection.run_execute_query(query)
                 self.display_results(results)
                 self.statusBar().showMessage("Сброс статистики прошёл успешно.")
                 self.reconnect_to_db()
@@ -322,7 +322,7 @@ class QueryApp(QMainWindow):
         query = "SELECT pg_stat_reset();"
         try:
             with self.db_connection:
-                results = self.db_connection.execute_query(query)
+                results = self.db_connection.run_execute_query(query)
                 self.display_results(results)
                 self.statusBar().showMessage("Сброс статистики прошёл успешно.")
                 self.reconnect_to_db()
@@ -362,7 +362,7 @@ class QueryApp(QMainWindow):
 
         try:
             with self.db_connection:
-                results = self.db_connection.execute_query(query)
+                results = self.db_connection.run_execute_query(query)
                 self.display_results(results)
                 self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
@@ -370,19 +370,22 @@ class QueryApp(QMainWindow):
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def search_query(self):
-        self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_default())
+        column = Constants.table_columns_default()
+        self.table_widget_results.setHorizontalHeaderLabels(column)
+
         if not self.db_connection:
             self.statusBar().showMessage("Не установлено соединение с БД.")
             return
 
-        query = Constants.get_search_query(self.combo_dbname.currentText(), self.line_edit_search.text())
-
         try:
-            results = self.db_connection.execute_query(query)
-            self.display_results(results)
-            self.statusBar().showMessage("Поиск выполнен успешно.")
+            querySearch = Constants.get_search_query(self.combo_dbname.currentText(), self.line_edit_search.text())
+
+            with self.db_connection:
+                results = self.db_connection.run_execute_query(querySearch)
+                self.display_results(results)
+                self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
-            self.statusBar().showMessage(f"Ошибка выполнения поиска: {e}")
+            self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def execute_custom_query(self):
@@ -398,7 +401,7 @@ class QueryApp(QMainWindow):
 
         try:
             with self.db_connection:
-                results = self.db_connection.execute_query(query)
+                results = self.db_connection.run_execute_query(query)
                 self.display_results(results)
                 self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
@@ -438,6 +441,7 @@ class QueryApp(QMainWindow):
         for row_idx, row in enumerate(results):
             for col_idx, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
+                # item.setFlags(item.flags() | Qt.ItemIsEditable)
                 self.table_widget_results.setItem(row_idx, col_idx, item)
 
         # Установите ширину столбца «pg.query», чтобы он занимал 1/3 ширины таблицы.

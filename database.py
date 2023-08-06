@@ -34,7 +34,7 @@ class DatabaseManager:
             self.db_connection.close()
             self.db_connection = None
 
-    def execute_query(self, query):
+    def run_execute_query(self, query):
         try:
             cursor = self.db_connection.cursor()
             cursor.execute(query)

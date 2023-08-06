@@ -104,32 +104,32 @@ class QueryApp(QMainWindow):
         self.setLayout(layout)
 
         # Кнопки для подключения и отключения от базы данных
-        self.btn_connect = QPushButton("CONNECT", self)
+        self.btn_connect = QPushButton("Connect", self)
         self.btn_connect.clicked.connect(self.connect_to_db)
 
-        self.btn_disconnect = QPushButton("TERMINATE CONNECTION", self)
+        self.btn_disconnect = QPushButton("Terminate connection", self)
         self.btn_disconnect.clicked.connect(self.disconnect_from_db)
         self.btn_disconnect.setEnabled(False)
 
         # Кнопки для выполнения запросов и сброса статистики
-        self.btn_execute_query = QPushButton("PERFORM REQUEST", self)
+        self.btn_execute_query = QPushButton("ВЫПОЛНИТЬ ЗАПРОС", self)
         self.btn_execute_query.clicked.connect(self.execute_query)
 
         # Кнопки для выполнения запросов и сброса статистики
-        self.btn_execute_query_opr = QPushButton("GET_INS_UPD_DEL", self)
+        self.btn_execute_query_opr = QPushButton("get_ins_upd_del", self)
         self.btn_execute_query_opr.clicked.connect(self.execute_custom_query)
 
-        self.btn_reset_stats = QPushButton("PG_STAT_STATEMENTS_RESET", self)
+        self.btn_reset_stats = QPushButton("pg_stat_statements_reset", self)
         self.btn_reset_stats.clicked.connect(self.reset_stats)
 
-        self.btn_pg_stat_reset = QPushButton("PG_STAT_RESET", self)
+        self.btn_pg_stat_reset = QPushButton("pg_stat_reset", self)
         self.btn_pg_stat_reset.clicked.connect(self.pg_stat_reset)
 
-        self.btn_reconnect_to_db = QPushButton("RECONNECT_TO_DB", self)
+        self.btn_reconnect_to_db = QPushButton("reconnect_to_db", self)
         self.btn_reconnect_to_db.clicked.connect(self.reconnect_to_db)
 
         # Кнопка сохранения настроек
-        self.btn_save_settings = QPushButton("SAVE SETTING", self)
+        self.btn_save_settings = QPushButton("Save setting", self)
         self.btn_save_settings.clicked.connect(self.save_connection_settings)
 
         self.setFocusPolicy(Qt.StrongFocus)
@@ -186,7 +186,7 @@ class QueryApp(QMainWindow):
         # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
         self.text_edit_full_query = QTextEdit(self)
         self.text_edit_full_query.setFontFamily("JetBrains Mono")
-        self.text_edit_full_query.setPlaceholderText("Введите ваш пользовательский запрос")
+        self.text_edit_full_query.setPlaceholderText("Введите список наименований таблиц, пример: NameTable1, NameTable2 и т.д и нажмите get_ins_upd_del [Ctrl, Shift + Enter], если требуется получить количество вставленных, обновлённых или удалённых записей.")
         self.layout.addWidget(self.text_edit_full_query)
 
         # Применить подсветку синтаксиса с помощью SQLHighlighter

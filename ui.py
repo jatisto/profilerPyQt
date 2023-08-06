@@ -3,7 +3,7 @@ import re
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
-    QLineEdit, QComboBox, QTextEdit, QFrame, QAction, QApplication, QSystemTrayIcon, QMenu
+    QLineEdit, QComboBox, QTextEdit, QFrame, QAction, QApplication, QSystemTrayIcon, QMenu, QMessageBox
 
 import Constants
 from database import DatabaseManager
@@ -47,6 +47,7 @@ class QueryApp(QMainWindow):
         self.show_action = None
         self.tray_menu = None
         self.tray_icon = None
+        self.is_not_setting = None
         self.setWindowTitle("Query Viewer")
         self.setGeometry(100, 100, 1200, 800)
 
@@ -97,7 +98,6 @@ class QueryApp(QMainWindow):
         )
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
-        # self.table_widget_results.horizontalHeader().sectionClicked.connect(self.handle_header_click)
 
         layout.addWidget(self.table_widget_results)
 
@@ -112,7 +112,7 @@ class QueryApp(QMainWindow):
         self.btn_disconnect.setEnabled(False)
 
         # Кнопки для выполнения запросов и сброса статистики
-        self.btn_execute_query = QPushButton("ВЫПОЛНИТЬ ЗАПРОС", self)
+        self.btn_execute_query = QPushButton("Выполнить запрос", self)
         self.btn_execute_query.clicked.connect(self.execute_query)
 
         # Кнопки для выполнения запросов и сброса статистики
@@ -205,9 +205,6 @@ class QueryApp(QMainWindow):
         self.table_widget_results.currentCellChanged.connect(self.view_full_query)
         # Назначьте экземпляр маркера переменной-члену для последующего доступа
         self.highlighter = highlighter
-
-    # def handle_header_click(self, column_index):
-    #     self.table_widget_results.sortByColumn(column_index, Qt.DescendingOrder)
 
     def setting_input_fields(self):
         # Поля для настроек подключения
@@ -351,6 +348,10 @@ class QueryApp(QMainWindow):
             self.btn_disconnect.setEnabled(False)
 
     def execute_query(self):
+        if not self.is_not_setting:
+            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            return
+
         column = Constants.table_columns_default()
         self.table_widget_results.setHorizontalHeaderLabels(column)
 
@@ -367,9 +368,14 @@ class QueryApp(QMainWindow):
                 self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
+            self.show_error_message("Ошибка выполнения запроса", e)
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def search_query(self):
+        if not self.is_not_setting:
+            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            return
+
         column = Constants.table_columns_default()
         self.table_widget_results.setHorizontalHeaderLabels(column)
 
@@ -386,16 +392,28 @@ class QueryApp(QMainWindow):
                 self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
+            self.show_error_message("Ошибка выполнения запроса", e)
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def execute_custom_query(self):
+        if not self.is_not_setting:
+            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            return
+
         self.reconnect_to_db()
-        self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_ins_upt_del())
         if not self.db_connection:
             self.statusBar().showMessage("Не установлено соединение с БД.")
             return
 
         table_names = self.get_table_names()
+        at_least_one_non_empty = any(name and name.strip() for name in table_names)
+
+        if not at_least_one_non_empty:
+            self.show_error_message("Ошибка", "Все имена таблиц пусты")
+            return
+
+        self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_ins_upt_del())
+
         query_template = Constants.pg_stat_user_tables_query()
         query = query_template.format(", ".join(["'{}'".format(name) for name in table_names]))
 
@@ -406,6 +424,7 @@ class QueryApp(QMainWindow):
                 self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
+            self.show_error_message("Ошибка выполнения пользовательского запроса", e)
             write_log(f"Ошибка выполнения пользовательского запроса: {e}")
 
     def execute_selected_query(self):
@@ -467,13 +486,19 @@ class QueryApp(QMainWindow):
     def load_default_connection_settings(self):
         settings = ConnectionSettings.load_all_settings()
 
-        actual_settings = [setting for setting in settings if setting["actual"]]
+        if len(settings) == 0:
+            self.is_not_setting = False
+            return
 
-        self.default_dbname = actual_settings[0]["dbname"]
-        self.default_host = actual_settings[0]["host"]
-        self.default_port = actual_settings[0]["port"]
-        self.default_username = actual_settings[0]["username"]
-        self.default_password = actual_settings[0]["password"]
+        else:
+            self.is_not_setting = True
+            actual_settings = [setting for setting in settings if setting["actual"]]
+
+            self.default_dbname = actual_settings[0]["dbname"]
+            self.default_host = actual_settings[0]["host"]
+            self.default_port = actual_settings[0]["port"]
+            self.default_username = actual_settings[0]["username"]
+            self.default_password = actual_settings[0]["password"]
 
     def load_connection_settings(self):
         databases = ConnectionSettings.load()
@@ -536,3 +561,11 @@ class QueryApp(QMainWindow):
             self.btn_disconnect.setEnabled(True)
         else:
             self.statusBar().showMessage("Ошибка подключения")
+
+    @staticmethod
+    def show_error_message(title, message):
+        error_box = QMessageBox()
+        error_box.setIcon(QMessageBox.Critical)
+        error_box.setWindowTitle(title)
+        error_box.setText(message)
+        error_box.exec_()

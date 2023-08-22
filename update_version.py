@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import os
 import shutil
@@ -14,7 +13,7 @@ from settings import ConnectionSettings
 from utility_function import handle_errors, write_log
 
 
-async def terminate_conflicting_processes():
+def terminate_conflicting_processes():
     conflicting_processes = ["PgProfilerQt5.exe"]  # Перечислите названия мешающих процессов
     for process in psutil.process_iter():
         try:
@@ -94,7 +93,7 @@ class Updater:
             return False
 
     @handle_errors(log_file="update.log", text='run_update')
-    async def run_update(self):
+    def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
 
@@ -105,11 +104,7 @@ class Updater:
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
             cmd = ["msiexec", "/i", msi_path]  # "/qn" означает "тихая" установка без отображения окон
-            await asyncio.create_subprocess_exec(*cmd)
-            await terminate_conflicting_processes()
-            os.chdir("../../")
-            shutil.rmtree(self.tmp_folder)
-            subprocess.run(["PgProfilerQt5.exe"], check=True)
+            subprocess.run(cmd, check=True)
         else:
             return "Установочный файл не найден."
 

@@ -105,11 +105,11 @@ class Updater:
             msi_path = os.path.join(dist_folder, msi_files[0])
             cmd = ["msiexec", "/i", msi_path]  # "/qn" означает "тихая" установка без отображения окон
             subprocess.run(cmd, check=True)
+            os.chdir("../../")
+            shutil.rmtree(self.tmp_folder)
+            subprocess.run(["PgProfilerQt5.exe"], check=True)
         else:
             return "Установочный файл не найден."
-
-        os.chdir("../../")
-        shutil.rmtree(self.tmp_folder)
         return "Обновление завершено."
 
     @staticmethod

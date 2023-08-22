@@ -26,19 +26,7 @@ executables: list[Executable] = [
 include_files = [
     ("themes", "themes"),
     ("icons", "icons"),
-    ("Constants.py", "Constants.py"),
-    ("database.py", "database.py"),
-    ("main.py", "main.py"),
-    ("settings.py", "settings.py"),
-    ("setup.py", "setup.py"),
-    ("sql_highlighter.py", "sql_highlighter.py"),
-    ("ui.py", "ui.py"),
-    ("utility_function.py", "utility_function.py"),
-    ("sql_highlighter.py", "sql_highlighter.py"),
-    ("setup.cfg", "setup.cfg"),
-    ("update_version.py", "update_version.py"),
     ("version.txt", "version.txt"),
-    ("update_version.py", "update_version.py"),
     ("auth.json", "auth.json"),
 ]
 

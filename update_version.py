@@ -82,26 +82,21 @@ class Updater:
 
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):
-        # self.kill_process()
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
+
         subprocess.run(["python", "setup.py", "bdist_msi"])
         dist_folder = os.path.join("dist")
         msi_files = [file for file in os.listdir(dist_folder) if file.endswith(".msi")]
 
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
-            # subprocess.run(["msiexec", "/i", msi_path])
             cmd = ["msiexec", "/i", msi_path, "/qn"]  # "/qn" означает "тихая" установка без отображения окон
             subprocess.run(cmd, check=True)
         else:
             return "Установочный файл не найден."
 
-        os.chdir("..")
-
-        new_path = os.getcwd()
-        write_log(f"Новый рабочий путь после os.chdir(\"..\"): {new_path}")
-
+        os.chdir("../../")
         shutil.rmtree(self.tmp_folder)
         return "Обновление завершено."
 

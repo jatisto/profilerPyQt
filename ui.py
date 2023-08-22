@@ -606,4 +606,5 @@ class QueryApp(QMainWindow):
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            self.close()
             updater.run_update()

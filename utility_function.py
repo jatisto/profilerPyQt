@@ -9,16 +9,16 @@ def handle_errors(log_file, text=''):
                 return func(*args, **kwargs)
             except Exception as exp:
                 error_msg = f"{text}\n{str(exp)}\n{traceback.format_exc()}"
-                with open(f"Logs/{log_file}", 'a', encoding='utf-8') as log:
+                with open(f"{log_file}", 'a', encoding='utf-8') as log:
                     log.write(error_msg)
-                write_log(f"Произошла ошибка: {str(exp)}", f"Logs/{log_file}")
-                write_log(traceback.format_exc(), f"Logs/{log_file}")
+                write_log(f"Произошла ошибка: {str(exp)}", f"{log_file}")
+                write_log(traceback.format_exc(), f"{log_file}")
             except KeyboardInterrupt as exp:
                 error_msg: str = f"{text}\n{str(exp)}\n{traceback.format_exc()}"
-                with open(f"Logs/{log_file}", 'a', encoding='utf-8') as log:
+                with open(f"{log_file}", 'a', encoding='utf-8') as log:
                     log.write(error_msg)
-                write_log(f"Произошла ошибка: {str(exp)}", f"Logs/{log_file}")
-                write_log(traceback.format_exc(), f"Logs/{log_file}")
+                write_log(f"Произошла ошибка: {str(exp)}", f"{log_file}")
+                write_log(traceback.format_exc(), f"{log_file}")
 
         return wrapper
 
@@ -26,7 +26,7 @@ def handle_errors(log_file, text=''):
 
 
 def write_log(text_log, log_file="base_log_file.log") -> None:
-    with open(f"Logs/{log_file}", 'a', encoding='utf-8') as log:
+    with open(f"{log_file}", 'a', encoding='utf-8') as log:
         log.write('\n')
         log.write(f'{datetime.datetime.now()} - {text_log}\n')
 

@@ -8,7 +8,7 @@ from distutils.version import LooseVersion
 from pathlib import Path
 
 from settings import ConnectionSettings
-from utility_function import handle_errors
+from utility_function import handle_errors, write_log
 
 
 class Updater:
@@ -94,7 +94,7 @@ class Updater:
 
         os.chdir("..")
         new_path = os.getcwd()
-        print("Новый рабочий путь после os.chdir(\"..\"):", new_path)
+        write_log(f"Новый рабочий путь после os.chdir(\"..\"): {new_path}")
         shutil.rmtree(self.tmp_folder)
         self.remove_program()
         return "Обновление завершено."
@@ -102,8 +102,8 @@ class Updater:
     @staticmethod
     @handle_errors(log_file="update.log", text='remove_program')
     def remove_program():
-        install_path: str = os.path.join(os.environ["APPDATA"], "Local", "Programs",
-                                         "PgProfilerQt5")  # Путь к установленной папке приложения
+        install_path = os.path.join(os.environ["APPDATA"], "Local", "Programs",
+                                    "PgProfilerQt5")  # Путь к установленной папке приложения
 
         try:
             for root, dirs, files in os.walk(install_path):
@@ -116,6 +116,6 @@ class Updater:
                     dir_path = os.path.join(root, dir)
                     shutil.rmtree(dir_path)  # Удаление папки
 
-            print("Программа успешно удалена, оставив settings.json и auth.json.")
+            write_log("Программа успешно удалена, оставив settings.json и auth.json.")
         except Exception as e:
-            print("Произошла ошибка при удалении программы:", e)
+            write_log("Произошла ошибка при удалении программы:", e)

@@ -16,14 +16,14 @@ executables: list[Executable] = [
     Executable(
         "main.py",
         base=base,
-        target_name=f"PgProfilerQt5_{new_version}.exe",
+        target_name=f"PgProfilerQt5.exe",
         icon='icons/icon.ico',
         shortcut_name='PgProfilerQt5',
         shortcut_dir="ProgramMenuFolder"
     )]
 
 # Список файлов для включения в сборку
-include_files: list[str, str] = [
+include_files = [
     ("themes", "themes"),
     ("icons", "icons"),
     ("Constants.py", "Constants.py"),
@@ -53,7 +53,7 @@ options = {
 setup(
     name="PgProfilerQt5",
     version=new_version,  # Используйте новую версию
-    description="Profiler for PG",
+    description=f"Profiler for PG. Ver. {new_version}",
     options=options,
     executables=executables
 )

@@ -186,7 +186,8 @@ class QueryApp(QMainWindow):
         # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
         self.text_edit_full_query = QTextEdit(self)
         self.text_edit_full_query.setFontFamily("JetBrains Mono")
-        self.text_edit_full_query.setPlaceholderText("Введите список наименований таблиц, пример: NameTable1, NameTable2 и т.д и нажмите get_ins_upd_del [Ctrl, Shift + Enter], если требуется получить количество вставленных, обновлённых или удалённых записей.")
+        self.text_edit_full_query.setPlaceholderText(
+            "Введите список наименований таблиц, пример: NameTable1, NameTable2 и т.д и нажмите get_ins_upd_del [Ctrl, Shift + Enter], если требуется получить количество вставленных, обновлённых или удалённых записей.")
         self.layout.addWidget(self.text_edit_full_query)
 
         # Применить подсветку синтаксиса с помощью SQLHighlighter
@@ -521,6 +522,7 @@ class QueryApp(QMainWindow):
 
         if ConnectionSettings.save(new_settings):
             self.statusBar().showMessage("Настройки успешно сохранены.")
+            self.reconnect_to_db()
         else:
             self.statusBar().showMessage("Ошибка при сохранении настроек.")
             write_log(f"Ошибка при сохранении настроек")
@@ -543,7 +545,6 @@ class QueryApp(QMainWindow):
         event.accept()
 
     def reconnect_to_db(self):
-        # Disconnect from the current database if connected
         if self.db_connection:
             self.db_connection.disconnect()
             self.db_connection = None

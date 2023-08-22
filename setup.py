@@ -1,30 +1,18 @@
 from sys import platform
 from cx_Freeze import setup, Executable
 
-# Определите начальную версию вашего приложения
-initial_version = "1.1"
+from update_version import get_local_version
 
 base = None
-
-
-# Автоматически увеличивайте версию на единицу
-def increment_version(version):
-    major, minor = version.split(".")
-    new_version_increment = f"{major}.{int(minor) + 1}"
-    return new_version_increment
-
 
 if platform == 'win32':
     base = "Win32GUI"
 
-# Получите текущую версию
-current_version: str = initial_version
-
 # Получите новую версию
-new_version: str = increment_version(current_version)
+new_version: str = get_local_version()
 
 # Параметры для исполняемого файла
-executables: list[Executable] = [
+executables = [
     Executable(
         "main.py",
         base=base,
@@ -35,7 +23,7 @@ executables: list[Executable] = [
     )]
 
 # Список файлов для включения в сборку
-include_files: list[tuple[str, str]] = [
+include_files = [
     ("themes", "themes"),
     ("icons", "icons"),
     ("Constants.py", "Constants.py"),
@@ -46,7 +34,11 @@ include_files: list[tuple[str, str]] = [
     ("sql_highlighter.py", "sql_highlighter.py"),
     ("ui.py", "ui.py"),
     ("utility_function.py", "utility_function.py"),
-    ("sql_highlighter.py", "sql_highlighter.py")
+    ("sql_highlighter.py", "sql_highlighter.py"),
+    ("setup.cfg", "setup.cfg"),
+    ("update_version.py", "update_version.py"),
+    ("version.txt", "version.txt"),
+    ("update_version.py", "update_version.py"),
 ]
 
 # Параметры для создания установщика

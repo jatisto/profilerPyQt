@@ -13,6 +13,18 @@ from settings import ConnectionSettings
 from utility_function import handle_errors, write_log
 
 
+def terminate_conflicting_processes():
+    conflicting_processes = ["PgProfilerQt5.exe"]  # Перечислите названия мешающих процессов
+    for process in psutil.process_iter():
+        try:
+            process_info = process.as_dict(attrs=['pid', 'name'])
+            if process_info['name'] in conflicting_processes:
+                print(f"Terminating process {process_info['name']} (PID: {process_info['pid']})")
+                psutil.Process(process_info['pid']).terminate()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
+
 class Updater:
     def __init__(self):
         self.username = None
@@ -92,6 +104,7 @@ class Updater:
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
             cmd = ["msiexec", "/i", msi_path, "/qn"]  # "/qn" означает "тихая" установка без отображения окон
+            terminate_conflicting_processes()
             subprocess.run(cmd, check=True)
         else:
             return "Установочный файл не найден."
@@ -99,17 +112,6 @@ class Updater:
         os.chdir("../../")
         shutil.rmtree(self.tmp_folder)
         return "Обновление завершено."
-
-    def kill_process(self):
-        current_pid = os.getpid()
-        for process in psutil.process_iter(attrs=['pid', 'name']):
-            pid = process.info['pid']
-            if pid != current_pid:
-                try:
-                    proc = psutil.Process(pid)
-                    proc.terminate()
-                except psutil.NoSuchProcess:
-                    pass
 
     @staticmethod
     @handle_errors(log_file="update.log", text='remove_program')

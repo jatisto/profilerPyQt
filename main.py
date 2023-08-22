@@ -3,7 +3,6 @@ import sys
 import logging
 from PyQt5 import QtWidgets
 from ui import QueryApp
-from update_version import update
 
 
 def setup_logging():
@@ -21,7 +20,6 @@ def main():
     window = QueryApp()
     window.set_dark_theme(dark_theme_enabled)
     window.show()
-    update()
     app.aboutToQuit.connect(handle_app_exit)
     sys.exit(app.exec_())
 

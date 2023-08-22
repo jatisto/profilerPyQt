@@ -24,6 +24,14 @@ class ConnectionSettings:
             return []
 
     @staticmethod
+    def load_json(name_file, root_element):
+        try:
+            with open(name_file, "r") as json_file:
+                return json.load(json_file)[root_element]
+        except FileNotFoundError:
+            return []
+
+    @staticmethod
     def save(new_settings):
         try:
             if os.path.exists("settings.json"):

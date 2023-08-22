@@ -1,7 +1,7 @@
 from sys import platform
 from cx_Freeze import setup, Executable
 
-from update_version import get_local_version
+from update_version import Updater
 
 base = None
 
@@ -9,10 +9,10 @@ if platform == 'win32':
     base = "Win32GUI"
 
 # Получите новую версию
-new_version: str = get_local_version()
+new_version: str = Updater.get_local_version()
 
 # Параметры для исполняемого файла
-executables = [
+executables: list[Executable] = [
     Executable(
         "main.py",
         base=base,
@@ -23,7 +23,7 @@ executables = [
     )]
 
 # Список файлов для включения в сборку
-include_files = [
+include_files: list[str, str] = [
     ("themes", "themes"),
     ("icons", "icons"),
     ("Constants.py", "Constants.py"),
@@ -39,6 +39,7 @@ include_files = [
     ("update_version.py", "update_version.py"),
     ("version.txt", "version.txt"),
     ("update_version.py", "update_version.py"),
+    ("auth.json", "auth.json"),
 ]
 
 # Параметры для создания установщика

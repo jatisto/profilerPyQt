@@ -9,6 +9,7 @@ import Constants
 from database import DatabaseManager
 from settings import ConnectionSettings
 from sql_highlighter import SQLHighlighter
+from update_version import Updater
 from utility_function import handle_errors, write_log
 
 
@@ -16,8 +17,12 @@ def set_button_color(button, color, text_color='color: white;', font_family='Mes
     button.setStyleSheet(f"background-color: {color.name()};{text_color};font-family:{font_family}")
 
 
+updater = Updater()
+
+
 @handle_errors(log_file="ui.log", text='QueryApp')
 class QueryApp(QMainWindow):
+
     def __init__(self):
         super().__init__()
         self.use_custom_query = None
@@ -153,6 +158,15 @@ class QueryApp(QMainWindow):
         settings_layout.addWidget(self.btn_disconnect)
         settings_layout.addWidget(self.btn_save_settings)
 
+        self.btn_check_updates = QPushButton("Check for Updates", self)
+        self.btn_check_updates.clicked.connect(self.check_for_updates)
+        # self.layout.addWidget(self.btn_check_updates)
+
+        self.btn_update = QPushButton("Update", self)
+        self.btn_update.clicked.connect(self.update_application)
+        self.btn_update.setVisible(False)  # Hide the button initially
+        # self.layout.addWidget(self.btn_update)
+
         settings_widget = QWidget()
         settings_widget.setLayout(settings_layout)
 
@@ -181,6 +195,8 @@ class QueryApp(QMainWindow):
         btn_layout.addWidget(self.btn_pg_stat_reset)
         btn_layout.addWidget(self.btn_execute_query_opr)
         btn_layout.addWidget(self.btn_execute_query)
+        btn_layout.addWidget(self.btn_check_updates)
+        btn_layout.addWidget(self.btn_update)
         btn_layout.addStretch()
 
         # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
@@ -488,7 +504,12 @@ class QueryApp(QMainWindow):
         settings = ConnectionSettings.load_all_settings()
 
         if len(settings) == 0:
-            self.is_not_setting = False
+            self.default_dbname = "postgres"
+            self.default_host = "localhost"
+            self.default_port = "5432"
+            self.default_username = "postgres"
+            self.default_password = "123456"
+            self.is_not_setting = True
             return
 
         else:
@@ -570,3 +591,16 @@ class QueryApp(QMainWindow):
         error_box.setWindowTitle(title)
         error_box.setText(message)
         error_box.exec_()
+
+    def check_for_updates(self):
+        is_new_version_available = updater.check_update()
+
+        if is_new_version_available:
+            self.btn_update.setVisible(True)  # Show the "Update" button
+        else:
+            QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
+
+    def update_application(self):
+        QMessageBox.information(self, "Обновление", "Доступно обновление!...")
+        self.close()
+        updater.run_update()

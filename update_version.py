@@ -7,6 +7,8 @@ import zipfile
 from distutils.version import LooseVersion
 from pathlib import Path
 
+from PyQt5.QtWidgets import QApplication
+
 from settings import ConnectionSettings
 from utility_function import handle_errors, write_log
 
@@ -79,10 +81,11 @@ class Updater:
             return False
 
     @handle_errors(log_file="update.log", text='run_update')
-    def run_update(self):
+    def run_update(self, self_qt: QApplication):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
         subprocess.run(["python", "setup.py", "bdist_msi"])
+        self_qt.quit()
         dist_folder = os.path.join("dist")
         msi_files = [file for file in os.listdir(dist_folder) if file.endswith(".msi")]
 

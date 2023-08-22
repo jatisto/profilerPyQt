@@ -607,7 +607,6 @@ class QueryApp(QMainWindow):
         QMessageBox.information(self, "Обновление", "Доступно обновление!...")
 
         self.close()
-        QApplication.quit()
-        event.accept()
-        updater.run_update()
+        updater.run_update(self, QApplication)
+
 

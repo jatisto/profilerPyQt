@@ -104,7 +104,6 @@ class Updater:
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
             cmd = ["msiexec", "/i", msi_path]  # "/qn" означает "тихая" установка без отображения окон
-            terminate_conflicting_processes()
             subprocess.run(cmd, check=True)
         else:
             return "Установочный файл не найден."

@@ -1,5 +1,4 @@
 import base64
-import requests
 import os
 import shutil
 import subprocess
@@ -7,7 +6,8 @@ import zipfile
 from distutils.version import LooseVersion
 from pathlib import Path
 
-from PyQt5.QtWidgets import QApplication
+import psutil
+import requests
 
 from settings import ConnectionSettings
 from utility_function import handle_errors, write_log
@@ -81,26 +81,40 @@ class Updater:
             return False
 
     @handle_errors(log_file="update.log", text='run_update')
-    def run_update(self, self_qt: QApplication):
+    def run_update(self):
+        # self.kill_process()
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
         subprocess.run(["python", "setup.py", "bdist_msi"])
-        self_qt.quit()
         dist_folder = os.path.join("dist")
         msi_files = [file for file in os.listdir(dist_folder) if file.endswith(".msi")]
 
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
-            subprocess.run(["msiexec", "/i", msi_path])
+            # subprocess.run(["msiexec", "/i", msi_path])
+            cmd = ["msiexec", "/i", msi_path, "/qn"]  # "/qn" означает "тихая" установка без отображения окон
+            subprocess.run(cmd, check=True)
         else:
             return "Установочный файл не найден."
 
         os.chdir("..")
+
         new_path = os.getcwd()
         write_log(f"Новый рабочий путь после os.chdir(\"..\"): {new_path}")
+
         shutil.rmtree(self.tmp_folder)
-        self.remove_program()
         return "Обновление завершено."
+
+    def kill_process(self):
+        current_pid = os.getpid()
+        for process in psutil.process_iter(attrs=['pid', 'name']):
+            pid = process.info['pid']
+            if pid != current_pid:
+                try:
+                    proc = psutil.Process(pid)
+                    proc.terminate()
+                except psutil.NoSuchProcess:
+                    pass
 
     @staticmethod
     @handle_errors(log_file="update.log", text='remove_program')

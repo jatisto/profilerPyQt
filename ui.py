@@ -562,11 +562,8 @@ class QueryApp(QMainWindow):
             self.show()
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть приложение?',
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            event.accept()
+        QApplication.quit()
+        event.accept()
 
     def reconnect_to_db(self):
         if self.db_connection:
@@ -603,10 +600,10 @@ class QueryApp(QMainWindow):
         else:
             QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
 
-    def update_application(self, event):
+    def update_application(self):
         QMessageBox.information(self, "Обновление", "Доступно обновление!...")
+        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть приложение?',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
-        self.close()
-        updater.run_update(self, QApplication)
-
-
+        if reply == QMessageBox.Yes:
+            updater.run_update()

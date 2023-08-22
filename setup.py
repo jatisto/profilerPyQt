@@ -35,6 +35,7 @@ options = {
     "build_exe": {
         "include_files": include_files,
         "packages": ["os"],
+        "build_exe": "build"  # Замените "build_folder_name" на желаемое название папки
     },
 }
 

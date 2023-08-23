@@ -13,18 +13,6 @@ from settings import ConnectionSettings
 from utility_function import handle_errors, write_log
 
 
-def terminate_conflicting_processes():
-    conflicting_processes = ["PgProfilerQt5.exe"]  # Перечислите названия мешающих процессов
-    for process in psutil.process_iter():
-        try:
-            process_info = process.as_dict(attrs=['pid', 'name'])
-            if process_info['name'] in conflicting_processes:
-                print(f"Terminating process {process_info['name']} (PID: {process_info['pid']})")
-                psutil.Process(process_info['pid']).terminate()
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-
-
 class Updater:
     def __init__(self):
         self.username = None

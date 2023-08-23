@@ -1,5 +1,7 @@
 import re
+import threading
 
+import psutil
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
@@ -18,6 +20,18 @@ def set_button_color(button, color, text_color='color: white;', font_family='Mes
 
 
 updater = Updater()
+
+
+def terminate_conflicting_processes():
+    conflicting_processes = ["PgProfilerQt5.exe"]
+    for process in psutil.process_iter():
+        try:
+            process_info = process.as_dict(attrs=['pid', 'name'])
+            if process_info['name'] in conflicting_processes:
+                write_log(f"Terminating process {process_info['name']} (PID: {process_info['pid']})")
+                psutil.Process(process_info['pid']).terminate()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
 
 
 @handle_errors(log_file="ui.log", text='QueryApp')
@@ -607,4 +621,10 @@ class QueryApp(QMainWindow):
 
         if reply == QMessageBox.Yes:
             self.close()
-            updater.run_update()
+            # Запустить асинхронно завершение конфликтующих процессов и затем обновление
+            threading.Thread(target=self.terminate_and_run_update).start()
+
+    @staticmethod
+    def terminate_and_run_update():
+        terminate_conflicting_processes()  # Завершение конфликтующих процессов
+        updater.run_update()  # Запуск обновления

@@ -614,7 +614,7 @@ class QueryApp(QMainWindow):
         else:
             QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
 
-    def run_update_and_close(self):
+    def update_application(self):
         threading.Thread(target=self.run_update_async).start()
         terminate_conflicting_processes()
         self.close()

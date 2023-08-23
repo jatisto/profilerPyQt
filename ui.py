@@ -616,7 +616,7 @@ class QueryApp(QMainWindow):
 
     def update_application(self):
         threading.Thread(target=self.run_update_async).start()
-        terminate_conflicting_processes()
+        # terminate_conflicting_processes()
         self.close()
 
     @staticmethod

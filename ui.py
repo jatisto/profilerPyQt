@@ -614,17 +614,11 @@ class QueryApp(QMainWindow):
         else:
             QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
 
-    def update_application(self):
-        QMessageBox.information(self, "Обновление", "Доступно обновление!...")
-        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть приложение?',
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            self.close()
-            # Запустить асинхронно завершение конфликтующих процессов и затем обновление
-            threading.Thread(target=self.terminate_and_run_update).start()
+    def run_update_and_close(self):
+        threading.Thread(target=self.run_update_async).start()
+        terminate_conflicting_processes()
+        self.close()
 
     @staticmethod
-    def terminate_and_run_update():
-        terminate_conflicting_processes()  # Завершение конфликтующих процессов
-        updater.run_update()  # Запуск обновления
+    def run_update_async():
+        updater.run_update()

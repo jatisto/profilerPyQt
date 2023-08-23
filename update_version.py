@@ -85,18 +85,12 @@ class Updater:
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
         subprocess.run(["python", "setup.py", "bdist_msi"])
-        write_log(f"Запуск скрипта setup.py")
         dist_folder = os.path.join("dist")
         msi_files = [file for file in os.listdir(dist_folder) if file.endswith(".msi")]
-        write_log(f"Запуск скрипта {dist_folder}")
-        write_log(f"Запуск скрипта {msi_files}")
         if msi_files:
             msi_path = os.path.join(dist_folder, msi_files[0])
-            write_log(f"Запуск скрипта {msi_path}")
             cmd = ["msiexec", "/i", msi_path]  # "/qn" означает "тихая" установка без отображения окон
-            write_log(f"Запуск скрипта {cmd}")
             subprocess.run(cmd, check=True)
-            write_log(f"Запуск установки")
         else:
             return "Установочный файл не найден."
 

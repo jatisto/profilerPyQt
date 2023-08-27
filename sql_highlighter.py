@@ -13,7 +13,7 @@ class SQLHighlighter(QSyntaxHighlighter):
 
         # SQL keyword format
         keyword_format = QTextCharFormat()
-        keyword_format.setForeground(QColor(162, 94, 201))  # Dark gray color for keywords
+        keyword_format.setForeground(QColor(113, 171, 255))  # Dark gray color for keywords
         keyword_format.setFontWeight(QFont.Bold)
         keyword_format.setFont(QFont("MesloLGS NF", 11))
         keywords = [
@@ -74,7 +74,7 @@ class SQLHighlighter(QSyntaxHighlighter):
 
         # Quoted identifier format (e.g., "NblsSupplementaryAgreement")
         identifier_format = QTextCharFormat()
-        identifier_format.setForeground(QColor(59, 104, 154))  # Dark green color for identifiers
+        identifier_format.setForeground(QColor(249, 168, 37))  # Dark green color for identifiers
         identifier_format.setFont(QFont("MesloLGS NF", 11, QFont.Normal))
         rule = (r'"[^"]*"', identifier_format)
         self.highlight_rules.append(rule)

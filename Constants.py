@@ -1,6 +1,6 @@
 class Constants:
-    table_columns_default = ["QUERY", "ROWS", "CALLS", "QUERY_START", "BACKEND_START"]
-    table_columns_ins_upt_del = ["RELNAME", "N_TUP_INS", "N_TUP_UPD", "N_TUP_DEL", "N_DEAD_TUP"]
+    table_columns_default = ["Запрос", "Ряды", "Вызовы", "Начало запроса", "Время запуска"]
+    table_columns_ins_upt_del = ["relname", "tup_ins", "tup_upd", "tup_del", "dead_tup"]
 
 
 def table_columns_default():

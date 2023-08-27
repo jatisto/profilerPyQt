@@ -2,6 +2,8 @@ import os
 import sys
 import logging
 from PyQt5 import QtWidgets
+
+from UiTheme import UiTheme
 from ui import QueryApp
 
 
@@ -16,9 +18,7 @@ def setup_logging():
 def main():
     app = QtWidgets.QApplication(sys.argv)
     setup_logging()
-    dark_theme_enabled = True
     window = QueryApp()
-    window.set_dark_theme(dark_theme_enabled)
     window.show()
     app.aboutToQuit.connect(handle_app_exit)
     sys.exit(app.exec_())

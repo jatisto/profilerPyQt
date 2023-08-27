@@ -1,7 +1,9 @@
 import re
 
-from PyQt5.QtCore import Qt, QRegExp
-from PyQt5.QtGui import QTextCharFormat, QFont, QColor, QSyntaxHighlighter
+from PySide2.QtCore import (Qt, QRegExp)
+from PySide2.QtGui import (QColor, QFont,
+                           QSyntaxHighlighter, QTextCharFormat)
+
 
 class SQLHighlighter(QSyntaxHighlighter):
     def __init__(self, parent=None):

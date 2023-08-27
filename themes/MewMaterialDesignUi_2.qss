@@ -1,0 +1,391 @@
+/* Общие стили */
+QWidget {
+    font-family: "Lucida Console";
+    font-size: 14px;
+    background-color: #333333; /* Тёмно-серый цвет */
+    margin: 0;
+    padding: 0;
+    color: #e7e7e7; /* Белый цвет текста */
+}
+
+QTableWidget::item:selected {
+    background-color: #4f4f4f; color: white;
+}
+
+/* Заголовки */
+QLabel#titleLabel, QLabel#subtitleLabel {
+    color: #006663;
+    font-size: 1.5em;
+}
+
+/* Ссылки */
+QLabel#linkLabel {
+    color: #005451;
+    text-decoration: underline;
+}
+
+/* Параграфы */
+QLabel#paragraphLabel {
+    margin: 0.8em 0;
+}
+
+/* Списки */
+QListView {
+    margin: 1em 0;
+    padding-left: 1.67em;
+}
+
+QListView::item {
+    margin: 0.33em 0;
+}
+
+/* Таблицы */
+QTableView {
+    background-color: #1E1E1E; /* Тёмно-серый цвет для таблиц */
+    border: 1px solid #444444;
+    border-radius: 4px;
+}
+
+QTableView QHeaderView::section {
+    background-color: #2E2E2E;
+    border: 1px solid #444444;
+    padding: 6px;
+    font-weight: lighter;
+}
+
+QTableView QHeaderView {
+    border: none;
+}
+
+QTableView, QTableView QAbstractItemView {
+    border: none;
+}
+
+QTableView QAbstractItemView {
+    background-color: transparent;
+    alternate-background-color: #2E2E2E;
+}
+
+QTableView QAbstractItemView::item {
+    padding: 8px;
+}
+
+QTableView QAbstractItemView::item:selected {
+    background-color: #005451;
+    color: #cbcbcb;
+}
+
+QTableView QAbstractItemView::item:selected:disabled {
+    background-color: #444444;
+}
+
+/* Формы */
+QLineEdit, QTextEdit, QComboBox {
+    padding: 0.67em;
+    border: 1px solid #444444;
+    border-radius: 0.27em;
+    background-color: #1E1E1E; /* Тёмно-серый цвет */
+}
+
+/* Стили для QMessageBox */
+QMessageBox {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+QMessageBox QLabel {
+    color: #d9d9d9;
+    font-size: 14px;
+}
+
+/* Добавьте стили для текста внутри QMessageBox */
+QMessageBox QTextEdit {
+    background-color: #f0f0f0;
+    border: none;
+    font-size: 14px;
+    color: #333333;
+    padding: 8px;
+}
+
+QMessageBox QPushButton {
+    padding: 0.5em 1.2em; /* Увеличьте горизонтальный отступ */
+    border: none;
+    border-radius: 4px;
+    background-color: #2a81ee;
+    color: white;
+    cursor: pointer;
+    min-width: 100px; /* Установите минимальную ширину кнопки */
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #2a81ee;
+}
+
+QMessageBox QPushButton:focus {
+    border: 2px solid #4c9eef;
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #1572ea;
+}
+
+QMessageBox QPushButton:default {
+    background-color: #2a81ee;
+}
+
+QMessageBox QPushButton:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+QPushButton {
+    padding: 0.67em 1.33em;
+    border: none;
+    border-radius: 0.53em;
+    background-color: #006663;
+    color: white;
+    cursor: pointer;
+}
+
+QPushButton:hover {
+    background-color: #005451;
+}
+
+QPushButton:disabled {
+    background-color: #444444;
+    cursor: not-allowed;
+}
+
+/* Кнопка подключения */
+QPushButton#btn_connect {
+    background-color: #6caf6d;
+    color: black;
+}
+
+QPushButton#btn_connect:hover {
+    background-color: #68bb69;
+}
+
+QPushButton#btn_connect:pressed {
+    background-color: #559456;
+}
+
+QPushButton#btn_connect:focus {
+    border: 2px solid #48864d;
+}
+
+QPushButton#btn_connect:disabled {
+    background-color: #444444;
+    cursor: not-allowed;
+}
+
+/* Кнопка отключения */
+QPushButton#btn_disconnect {
+    background-color: #c94141;
+}
+
+QPushButton#btn_disconnect:hover {
+    background-color: #c93636;
+}
+
+QPushButton#btn_disconnect:pressed {
+    background-color: #c43030;
+}
+
+QPushButton#btn_disconnect:focus {
+    border: 2px solid #c94141;
+}
+
+QPushButton#btn_disconnect:disabled {
+    background-color: #444444;
+    cursor: not-allowed;
+}
+
+
+/* Стили для кнопок */
+QPushButton#btn_execute_query,
+QPushButton#btn_execute_query_opr,
+QPushButton#btn_reconnect_to_db,
+QPushButton#btn_pg_stat_reset,
+QPushButton#btn_reset_stats,
+QPushButton#btn_save_settings,
+QPushButton#btn_check_updates {
+    padding: 0.67em 1.33em;
+    border: none;
+    border-radius: 0.53em;
+    color: white;
+    cursor: pointer;
+}
+
+/* Кнопка выполнения запроса */
+QPushButton#btn_execute_query {
+    background-color: #6caf6d;
+    color: black;
+}
+
+QPushButton#btn_execute_query:hover {
+    background-color: #68bb69;
+}
+
+QPushButton#btn_execute_query:focus {
+    border: 2px solid #559456;
+}
+
+QPushButton#btn_execute_query:pressed {
+    background-color: #48864d;
+}
+
+QPushButton#btn_execute_query:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка пользовательского запроса */
+QPushButton#btn_execute_query_opr {
+    background-color: #FBC02D;
+    color: black;
+}
+
+QPushButton#btn_execute_query_opr:hover {
+    background-color: #F9A825;
+}
+
+QPushButton#btn_execute_query_opr:focus {
+    border: 2px solid #FBC02D;
+}
+
+QPushButton#btn_execute_query_opr:pressed {
+    background-color: #efbe4a;
+}
+
+QPushButton#btn_execute_query_opr:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка переподключения */
+QPushButton#btn_reconnect_to_db {
+    background-color: #d94545; /* Красный цвет */
+    color: white;
+}
+
+QPushButton#btn_reconnect_to_db:hover {
+    background-color: #d25d5d;
+    color: white;
+}
+
+QPushButton#btn_reconnect_to_db:focus {
+    border: 2px solid #d73f3f;
+    color: white;
+}
+
+QPushButton#btn_reconnect_to_db:pressed {
+    background-color: #444444;
+    color: white;
+}
+
+QPushButton#btn_reconnect_to_db:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка сброса статистики */
+QPushButton#btn_reset_stats {
+    background-color: #0b8d88;
+}
+
+QPushButton#btn_reset_stats:hover {
+    background-color: #04918e;
+}
+
+QPushButton#btn_reset_stats:focus {
+    border: 2px solid #04918e;
+}
+
+QPushButton#btn_reset_stats:pressed {
+    background-color: #038a88;
+}
+
+QPushButton#btn_reset_stats:disabled{
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка сброса статистики */
+QPushButton#btn_pg_stat_reset {
+    background-color: #FBC02D;
+}
+
+QPushButton#btn_pg_stat_reset:hover {
+    background-color: #F9A825;
+}
+
+QPushButton#btn_pg_stat_reset:focus {
+    border: 2px solid #FBC02D;
+}
+
+QPushButton#btn_pg_stat_reset:pressed {
+    background-color: #efbe4a;
+}
+
+QPushButton#btn_pg_stat_reset:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка сохранения настроек */
+QPushButton#btn_save_settings{
+    background-color: #1976D2;
+}
+
+QPushButton#btn_save_settings:hover{
+    background-color: #1565C0;
+}
+
+QPushButton#btn_save_settings:focus{
+    border: 2px solid #1976D2;
+}
+
+QPushButton#btn_save_settings:pressed{
+    background-color: #0D47A1;
+}
+
+QPushButton#btn_save_settings:disabled{
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+
+/* Кнопка сохранения настроек */
+
+QPushButton#btn_check_updates {
+    background-color: #eceefd;
+}
+
+QPushButton#btn_check_updates:hover {
+    background-color: #dee8ff;
+}
+
+QPushButton#btn_check_updates:focus {
+    border: 2px solid #dee8ff;
+}
+
+QPushButton#btn_check_updates:pressed {
+    background-color: #eceefd;
+}
+
+QPushButton#btn_check_updates:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+
+QPushButton#btn_update {
+    background-color: #1976D2;
+}
+
+/* Тёмный фон */
+QWidget {
+    background-color: #333333; /* Тёмно-серый цвет */
+}

@@ -2,12 +2,11 @@ import re
 import threading
 
 import psutil
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableWidget, QTableWidgetItem, \
-    QLineEdit, QComboBox, QTextEdit, QFrame, QAction, QApplication, QSystemTrayIcon, QMenu, QMessageBox
-
+from PySide2.QtCore import (Qt)
+from PySide2.QtGui import (QColor, QIcon)
+from PySide2.QtWidgets import *
 import Constants
+from UiTheme import UiTheme
 from database import DatabaseManager
 from settings import ConnectionSettings
 from sql_highlighter import SQLHighlighter
@@ -15,8 +14,18 @@ from update_version import Updater
 from utility_function import handle_errors, write_log
 
 
-def set_button_color(button, color, text_color='color: white;', font_family='MesloLGS NF'):
-    button.setStyleSheet(f"background-color: {color.name()};{text_color};font-family:{font_family}")
+def set_button_color(button, background_color, text_color="color: white;", font_family="MesloLGS NF", is_disable=False):
+    # Сохраняем текущие базовые стили кнопки
+    current_style = button.styleSheet()
+
+    # Создаем новый стиль на основе текущих базовых стилей
+    new_style = f"{current_style} background-color: {background_color.name()}; {text_color}; font-family: {font_family};"
+
+    if not is_disable:
+        new_style += " background-color: #E0E0E0;"
+
+    # Применяем новый стиль
+    button.setStyleSheet(new_style)
 
 
 updater = Updater()
@@ -35,7 +44,7 @@ def terminate_conflicting_processes():
 
 
 @handle_errors(log_file="ui.log", text='QueryApp')
-class QueryApp(QMainWindow):
+class QueryApp(QMainWindow, UiTheme):
 
     def __init__(self):
         super().__init__()
@@ -87,14 +96,16 @@ class QueryApp(QMainWindow):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        self.set_dark_theme(self.dark_theme_enabled)
+        UiTheme.set_dark_theme(self)
 
         self.q_system_tray_icon_build()
         self.setting_input_fields()
 
         # Поле поиска
         self.line_edit_search = QLineEdit(self)
-        self.line_edit_search.setPlaceholderText("SEARCH BY QUERY")
+        self.line_edit_search.setPlaceholderText("Найти")
+        self.line_edit_search.setFixedWidth(300)
+        self.line_edit_search.setToolTip("[Ctrl+F]")
 
         # Добавьте рамку, чтобы улучшить внешний вид поля поиска.
         search_frame = QFrame(self)
@@ -113,7 +124,7 @@ class QueryApp(QMainWindow):
         self.table_widget_results.setColumnCount(5)
 
         self.table_widget_results.setHorizontalHeaderLabels(
-            ["QUERY", "ROWS", "CALLS", "QUERY_START", "BACKEND_START"]
+            ["Запрос", "Ряды", "Вызовы", "Начало запроса", "Время запуска"]
         )
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
@@ -122,34 +133,53 @@ class QueryApp(QMainWindow):
 
         self.setLayout(layout)
 
-        # Кнопки для подключения и отключения от базы данных
-        self.btn_connect = QPushButton("Connect", self)
+        self.btn_connect = QPushButton("Подключиться", self)
         self.btn_connect.clicked.connect(self.connect_to_db)
+        self.btn_connect.setObjectName("btn_connect")
 
-        self.btn_disconnect = QPushButton("Terminate connection", self)
+        self.btn_disconnect = QPushButton("Отключиться", self)
         self.btn_disconnect.clicked.connect(self.disconnect_from_db)
         self.btn_disconnect.setEnabled(False)
+        self.btn_disconnect.setObjectName("btn_disconnect")
 
-        # Кнопки для выполнения запросов и сброса статистики
-        self.btn_execute_query = QPushButton("Выполнить запрос", self)
+        self.btn_execute_query = QPushButton("Выполнить", self)
         self.btn_execute_query.clicked.connect(self.execute_query)
+        self.btn_execute_query.setObjectName("btn_execute_query")
 
-        # Кнопки для выполнения запросов и сброса статистики
-        self.btn_execute_query_opr = QPushButton("get_ins_upd_del", self)
-        self.btn_execute_query_opr.clicked.connect(self.execute_custom_query)
+        UiTheme.set_icon_and_tooltip(self.btn_execute_query, "icons/rocket_32.ico",
+                                     f"[Ctrl+Enter] - Выполнить")
 
-        self.btn_reset_stats = QPushButton("pg_stat_statements_reset", self)
-        self.btn_reset_stats.clicked.connect(self.reset_stats)
-
-        self.btn_pg_stat_reset = QPushButton("pg_stat_reset", self)
+        self.btn_pg_stat_reset = QPushButton(self)
         self.btn_pg_stat_reset.clicked.connect(self.pg_stat_reset)
+        self.btn_pg_stat_reset.setObjectName("btn_pg_stat_reset")
 
-        self.btn_reconnect_to_db = QPushButton("reconnect_to_db", self)
+        UiTheme.set_icon_and_tooltip(self.btn_pg_stat_reset, "icons/reset_stastic.ico",
+                                     f"Сброс статистики (ins upd del) [SELECT pg_stat_reset()]")
+
+        self.btn_execute_query_opr = QPushButton(self)
+        self.btn_execute_query_opr.clicked.connect(self.execute_custom_query)
+        self.btn_execute_query_opr.setObjectName("btn_execute_query_opr")
+
+        UiTheme.set_icon_and_tooltip(self.btn_execute_query_opr, "icons/statistics.ico",
+                                     f"Статистика (ins upd del) в бд")
+
+        self.btn_reset_stats = QPushButton(self)
+        self.btn_reset_stats.clicked.connect(self.reset_stats)
+        self.btn_reset_stats.setObjectName("btn_reset_stats")
+
+        UiTheme.set_icon_and_tooltip(self.btn_reset_stats, "icons/reload_reset.ico",
+                                     f" [Ctrl+R] - Сбросить статистику (pg_stat_statements) [SELECT pg_stat_statements_reset()]")
+
+        self.btn_reconnect_to_db = QPushButton("", self)
         self.btn_reconnect_to_db.clicked.connect(self.reconnect_to_db)
+        self.btn_reconnect_to_db.setObjectName("btn_reconnect_to_db")
 
-        # Кнопка сохранения настроек
-        self.btn_save_settings = QPushButton("Save setting", self)
+        UiTheme.set_icon_and_tooltip_action(self.btn_reconnect_to_db, "icons/refresh-db.ico",
+                                     f"Переподключиться: {self.combo_dbname.currentText()}", "action_reconnect")
+
+        self.btn_save_settings = QPushButton("Сохранить", self)
         self.btn_save_settings.clicked.connect(self.save_connection_settings)
+        self.btn_save_settings.setObjectName("btn_save_settings")
 
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -164,24 +194,27 @@ class QueryApp(QMainWindow):
         settings_layout.addWidget(self.line_edit_password)
         settings_layout.addWidget(self.combo_dbname)
 
-        set_button_color(self.btn_disconnect, QColor(204, 36, 29))  # Red
-        set_button_color(self.btn_connect, QColor(152, 195, 121), "color: black;")  # Green
-        set_button_color(self.btn_save_settings, QColor(97, 175, 239), "color: black;")  # Blue
-
         settings_layout.addWidget(self.btn_connect)
         settings_layout.addWidget(self.btn_disconnect)
         settings_layout.addWidget(self.btn_save_settings)
 
-        self.btn_check_updates = QPushButton("Check for Updates", self)
+        self.btn_check_updates = QPushButton(self)
         self.btn_check_updates.clicked.connect(self.check_for_updates)
-        # self.layout.addWidget(self.btn_check_updates)
+        self.btn_check_updates.setVisible(True)
+        self.btn_check_updates.setObjectName("btn_check_updates")
 
-        self.btn_update = QPushButton("Update", self)
+        UiTheme.set_icon_and_tooltip(self.btn_check_updates, "icons/update_check.ico",
+                                     f"Проверьте наличие обновлений")
+
+        self.btn_update = QPushButton("Обновить", self)
         self.btn_update.clicked.connect(self.update_application)
         self.btn_update.setVisible(False)  # Hide the button initially
-        # self.layout.addWidget(self.btn_update)
+        self.btn_update.setObjectName("btn_update")
 
-        settings_widget = QWidget()
+        UiTheme.set_icon_and_tooltip(self.btn_update, "icons/update.ico",
+                                     f"Обновить")
+
+        settings_widget = QWidget(self)
         settings_widget.setLayout(settings_layout)
 
         self.layout.addWidget(settings_widget)
@@ -195,22 +228,27 @@ class QueryApp(QMainWindow):
 
         self.layout.addLayout(table_layout)
 
-        # Установите цвета с помощью функции set_button_color
-        set_button_color(self.btn_reconnect_to_db, QColor(204, 36, 29))  # Red
-        set_button_color(self.btn_execute_query, QColor(152, 195, 121), "color: black;")  # Green
-        set_button_color(self.btn_reset_stats, QColor(97, 175, 239), "color: black;")  # Blue
-        set_button_color(self.btn_pg_stat_reset, QColor(97, 175, 239), "color: black;")  # Blue
-        set_button_color(self.btn_execute_query_opr, QColor(97, 175, 239), "color: black;")  # Blue
+        separator = QFrame()
+        separator.setFrameShadow(
+            QFrame.Sunken)  # Выберите вид разделителя: Sunken (впавший), Raised (выпавший) или Plain (прямой)
 
         # Отрегулируйте расположение кнопок для лучшего использования пространства
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btn_reconnect_to_db)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_reset_stats)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_pg_stat_reset)
         btn_layout.addWidget(self.btn_execute_query_opr)
-        btn_layout.addWidget(self.btn_execute_query)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_check_updates)
         btn_layout.addWidget(self.btn_update)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(self.btn_execute_query)
         btn_layout.addStretch()
 
         # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
@@ -225,7 +263,7 @@ class QueryApp(QMainWindow):
 
         self.layout.addLayout(btn_layout)
 
-        central_widget = QWidget()
+        central_widget = QWidget(self)
         central_widget.setLayout(self.layout)
         self.setCentralWidget(central_widget)
 
@@ -237,25 +275,26 @@ class QueryApp(QMainWindow):
         # Назначьте экземпляр маркера переменной-члену для последующего доступа
         self.highlighter = highlighter
 
+
     def setting_input_fields(self):
         # Поля для настроек подключения
         self.line_edit_host = QLineEdit(self)
-        self.line_edit_host.setPlaceholderText("HOST")
+        self.line_edit_host.setPlaceholderText("Хост")
         self.line_edit_host.setText(self.default_host)
         self.line_edit_port = QLineEdit(self)
-        self.line_edit_port.setPlaceholderText("PORT")
+        self.line_edit_port.setPlaceholderText("Порт")
         self.line_edit_port.setText(self.default_port)
         self.line_edit_username = QLineEdit(self)
-        self.line_edit_username.setPlaceholderText("USER NAME")
+        self.line_edit_username.setPlaceholderText("Пользователь")
         self.line_edit_username.setText(self.default_username)
         self.line_edit_password = QLineEdit(self)
-        self.line_edit_password.setPlaceholderText("PASSWORD")
+        self.line_edit_password.setPlaceholderText("Пароль")
         self.line_edit_password.setEchoMode(QLineEdit.Password)
         self.line_edit_password.setText(self.default_password)
         # Поле со списком для выбора базы данных
         self.combo_dbname = QComboBox(self)
         self.combo_dbname.setEditable(True)
-        self.combo_dbname.setPlaceholderText("DATABASE NAME")
+        self.combo_dbname.setPlaceholderText("База данных")
         self.combo_dbname.setCurrentText(self.default_dbname)
         self.combo_dbname.currentIndexChanged.connect(self.on_database_changed)
 
@@ -278,18 +317,6 @@ class QueryApp(QMainWindow):
         self.tray_icon.activated.connect(self.tray_icon_clicked)
         # Отображение иконки в трее
         self.tray_icon.show()
-
-    def set_dark_theme(self, enabled):
-        self.dark_theme_enabled = enabled
-        if enabled:
-            theme = "OneDarkVividItalic"
-            try:
-                with open("themes/{}.qss".format(theme), "r") as theme_file:
-                    self.setStyleSheet(theme_file.read())
-            except Exception as err:
-                print(f"Error: Couldn't open the file. {err}")
-        else:
-            self.setStyleSheet("")
 
     def execute_query_shortcut(self):
         if self.btn_execute_query.isEnabled():
@@ -380,7 +407,7 @@ class QueryApp(QMainWindow):
 
     def execute_query(self):
         if not self.is_not_setting:
-            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
             return
 
         column = Constants.table_columns_default()
@@ -404,7 +431,7 @@ class QueryApp(QMainWindow):
 
     def search_query(self):
         if not self.is_not_setting:
-            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            self.show_error_message(self,"Ошибка", "Данные для подключения отсутствует.")
             return
 
         column = Constants.table_columns_default()
@@ -423,12 +450,12 @@ class QueryApp(QMainWindow):
                 self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
-            self.show_error_message("Ошибка выполнения запроса", e)
+            self.show_error_message(self,"Ошибка выполнения запроса", e)
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def execute_custom_query(self):
         if not self.is_not_setting:
-            self.show_error_message("Ошибка", "Данные для подключения отсутствует.")
+            self.show_error_message(self,"Ошибка", "Данные для подключения отсутствует.")
             return
 
         self.reconnect_to_db()
@@ -440,7 +467,7 @@ class QueryApp(QMainWindow):
         at_least_one_non_empty = any(name and name.strip() for name in table_names)
 
         if not at_least_one_non_empty:
-            self.show_error_message("Ошибка", "Все имена таблиц пусты")
+            self.show_error_message(self,"Ошибка", "Все имена таблиц пусты")
             return
 
         self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_ins_upt_del())
@@ -455,7 +482,7 @@ class QueryApp(QMainWindow):
                 self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
-            self.show_error_message("Ошибка выполнения пользовательского запроса", e)
+            self.show_error_message(self,"Ошибка выполнения пользовательского запроса", e)
             write_log(f"Ошибка выполнения пользовательского запроса: {e}")
 
     def execute_selected_query(self):
@@ -491,7 +518,6 @@ class QueryApp(QMainWindow):
         for row_idx, row in enumerate(results):
             for col_idx, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
-                # item.setFlags(item.flags() | Qt.ItemIsEditable)
                 self.table_widget_results.setItem(row_idx, col_idx, item)
 
         # Установите ширину столбца «pg.query», чтобы он занимал 1/3 ширины таблицы.
@@ -599,8 +625,8 @@ class QueryApp(QMainWindow):
             self.statusBar().showMessage("Ошибка подключения")
 
     @staticmethod
-    def show_error_message(title, message):
-        error_box = QMessageBox()
+    def show_error_message(self, title, message):
+        error_box = QMessageBox(self)
         error_box.setIcon(QMessageBox.Critical)
         error_box.setWindowTitle(title)
         error_box.setText(message)
@@ -611,12 +637,12 @@ class QueryApp(QMainWindow):
 
         if is_new_version_available:
             self.btn_update.setVisible(True)  # Show the "Update" button
+            self.btn_check_updates.setVisible(False)  # Show the "Update" button
         else:
             QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
 
     def update_application(self):
         threading.Thread(target=self.run_update_async).start()
-        # terminate_conflicting_processes()
         self.close()
 
     @staticmethod

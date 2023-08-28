@@ -14,7 +14,7 @@ echo Replacing files >> %LOG_FILE%
 xcopy /s /y "build\PgStatStatementsReaderQt5\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
 
 echo Checking for successful file replacement >> %LOG_FILE%
-if %errorlevel%==0 (
+if %error level%==0 (
     echo Deleting temporary files >> %LOG_FILE%
     rmdir /s /q %TMP%\tmp_update_folder
 ) else (

@@ -1,29 +1,30 @@
 @echo off
 setlocal
 
-echo Copying files from PgStatStatementsReaderQt5 to temporary folder
-mkdir tmp
-xcopy /s /y "%ProgramFiles%\PgStatStatementsReaderQt5\*" "tmp\"
+set LOG_FILE=%ProgramFiles%\PgStatStatementsReaderQt5\bat_update_log.txt
 
-echo Closing PgStatStatementsReaderQt5.exe processes
+echo Copying files from PgStatStatementsReaderQt5 to temporary folder >> %LOG_FILE%
+mkdir %TMP%\tmp_update_folder
+xcopy /s /y "%ProgramFiles%\PgStatStatementsReaderQt5\*" "%TMP%\tmp_update_folder\"
+
+echo Closing PgStatStatementsReaderQt5.exe processes >> %LOG_FILE%
 taskkill /f /im PgStatStatementsReaderQt5.exe
 
-echo Replacing files
+echo Replacing files >> %LOG_FILE%
 xcopy /s /y "build\PgStatStatementsReaderQt5\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
 
-echo Checking for successful file replacement
+echo Checking for successful file replacement >> %LOG_FILE%
 if %errorlevel%==0 (
-    echo Deleting temporary files
-    rmdir /s /q tmp
-    echo Deleting temporary folder two levels up
-    rmdir /s /q "..\..\tmp_update_folder"
+    echo Deleting temporary files >> %LOG_FILE%
+    rmdir /s /q %TMP%\tmp_update_folder
 ) else (
-    echo Restoring files from temporary folder
-    xcopy /s /y "tmp\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
-    echo Deleting temporary files
-    rmdir /s /q tmp
+    echo Restoring files from temporary folder >> %LOG_FILE%
+    xcopy /s /y "%TMP%\tmp_update_folder\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
+    echo Deleting temporary files >> %LOG_FILE%
+    rmdir /s /q %TMP%\tmp_update_folder
 )
 
+echo Running PgStatStatementsReaderQt5.exe >> %LOG_FILE%
 start "" "%ProgramFiles%\PgStatStatementsReaderQt5\PgStatStatementsReaderQt5.exe"
 
 endlocal

@@ -1,53 +1,25 @@
 @echo off
-:: BatchGotAdmin
-:-------------------------------------
-REM  --> Check for permissions
-    IF "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
->nul 2>&1 "%SYSTEMROOT%\SysWOW64\cacls.exe" "%SYSTEMROOT%\SysWOW64\config\system"
-    ) ELSE (
->nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
-    )
+setlocal
 
-REM --> If error flag set, we do not have admin.
-    if '%errorlevel%' NEQ '0' (
-        echo Requesting administrative privileges...
-        goto UACPrompt
-    ) else ( goto gotAdmin )
+REM Копирование файлов из PgStatStatementsReaderQt5 во временную папку
+robocopy "%ProgramFiles%\PgStatStatementsReaderQt5" "tmp" /e /copyall /purge
 
-:UACPrompt
-    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-
-    "%temp%\getadmin.vbs"
-    del "%temp%\getadmin.vbs"
-    exit /B
-
-:gotAdmin
-    pushd "%CD%"
-    CD /D "%~dp0"
-:--------------------------------------
-
-:: Your original script goes here
-echo Copying files from PgStatStatementsReaderQt5 to temporary folder
-mkdir tmp
-xcopy /s /y "%ProgramFiles%\PgStatStatementsReaderQt5\*" "tmp\"
-
-echo Closing PgStatStatementsReaderQt5.exe processes
+REM Закрытие процессов PgStatStatementsReaderQt5.exe
 taskkill /f /im PgStatStatementsReaderQt5.exe
 
-echo Replacing files
-xcopy /s /y "build\PgStatStatementsReaderQt5\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
+REM Замена файлов
+robocopy "build\PgStatStatementsReaderQt5" "%ProgramFiles%\PgStatStatementsReaderQt5" /e /copyall /purge
 
-echo Checking for successful file replacement
+REM Проверка на успешную замену файлов
 if %errorlevel%==0 (
-    echo Deleting temporary files
+    REM Удаление временных файлов
     rmdir /s /q tmp
-    echo Deleting temporary folder two levels up
+    REM Удаление временной папки два уровня ниже
     rmdir /s /q "..\..\tmp_update_folder"
 ) else (
-    echo Restoring files from temporary folder
-    xcopy /s /y "tmp\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
-    echo Deleting temporary files
+    REM Восстановление файлов из временной папки
+    robocopy "tmp" "%ProgramFiles%\PgStatStatementsReaderQt5" /e /copyall /purge
+    REM Удаление временных файлов
     rmdir /s /q tmp
 )
 

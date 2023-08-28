@@ -21,7 +21,8 @@ executables: list[Executable] = [
         target_name=f"PgStatStatementsReaderQt5.exe",
         icon='icons/icon.ico',
         shortcut_name='PgStatStatementsReaderQt5',
-        shortcut_dir="ProgramMenuFolder"
+        shortcut_dir="ProgramMenuFolder",
+        uac_admin=True
     )]
 
 # Список файлов для включения в сборку

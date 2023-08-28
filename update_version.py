@@ -16,7 +16,7 @@ class Updater:
         self.username = None
         self.token = None
         self.repo = None
-        self.tmp_folder = "tmp_update_folder"
+        self.tmp_folder = os.path.join(os.environ['TMP'], "tmp_update_folder")
         self.file_path = "version.txt"
         self.local_version = self.get_local_version()
         self.load_auth_data_for_git()
@@ -55,10 +55,11 @@ class Updater:
                 file.write(response.content)
 
             with zipfile.ZipFile(archive_path, "r") as zip_ref:
-                zip_ref.extractall(output_dir)
+                extract_path = os.path.join(self.tmp_folder, self.repo)
+                zip_ref.extractall(extract_path)
 
             os.remove(archive_path)
-            print(f"Репозиторий {self.repo} был успешно загружен и извлечен в {output_dir}")
+            print(f"Репозиторий {self.repo} был успешно загружен и извлечен в {extract_path}")
         else:
             print("Не удалось загрузить архив репозитория.")
 
@@ -81,5 +82,6 @@ class Updater:
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
-        os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
+        extract_path = os.path.join(self.tmp_folder, self.repo)
+        os.chdir(os.path.join(extract_path, f"{self.repo}-main"))
         subprocess.run(["python", "update.py", "build"])

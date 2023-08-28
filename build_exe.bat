@@ -8,8 +8,8 @@ set dist_dir=dist
 rem Запуск скрипта инсталлятора
 "C:\Program Files (x86)\Inno Setup 6\iscc.exe" %installer_script%
 
-@REM rem Удаление папки build
-@REM rmdir /s /q "build"
+rem Удаление папки build
+rmdir /s /q "build"
 
 echo Successful!
 

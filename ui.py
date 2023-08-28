@@ -76,7 +76,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.tray_menu = None
         self.tray_icon = None
         self.is_not_setting = None
-        self.setWindowTitle("Query Viewer")
+        self.setWindowTitle("Интерфейс для работы с pg_stat_statements")
         self.setGeometry(100, 100, 1200, 800)
 
         self.db_connection = None

@@ -16,9 +16,9 @@ executables: list[Executable] = [
     Executable(
         "main.py",
         base=base,
-        target_name=f"PgProfilerQt5.exe",
+        target_name=f"PgStatStatementsReaderQt5.exe",
         icon='icons/icon.ico',
-        shortcut_name='PgProfilerQt5',
+        shortcut_name='PgStatStatementsReaderQt5',
         shortcut_dir="ProgramMenuFolder"
     )]
 
@@ -40,9 +40,9 @@ options = {
 }
 
 setup(
-    name="PgProfilerQt5",
+    name="PgStatStatementsReaderQt5",
     version=new_version,  # Используйте новую версию
-    description=f"Profiler for PG. Ver. {new_version}",
+    description=f"Интерфейс для работы с pg_stat_statements. v.{new_version}",
     options=options,
     executables=executables
 )

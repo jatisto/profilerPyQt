@@ -3,3 +3,5 @@ PyQt5~=5.15.9
 psycopg2~=2.9.5
 psutil~=5.9.5
 requests~=2.31.0
+PySide2~=5.15.2.1
+Nuitka~=1.7.10

@@ -30,7 +30,7 @@ class Updater:
         if version_file.is_file():
             with open(version_file, "r") as f:
                 return f.read().strip()
-        return "0.0"
+        return "0.0.0"
 
     @handle_errors(log_file="update.log", text='get_remote_version')
     def get_remote_version(self) -> str:
@@ -44,7 +44,7 @@ class Updater:
             decoded_content = base64.b64decode(file_content).decode("utf-8")
             return decoded_content
         else:
-            return "0.0"
+            return "0.0.0"
 
     @handle_errors(log_file="update.log", text='download_and_extract_repo_archive')
     def download_and_extract_repo_archive(self, archive_format, output_dir):

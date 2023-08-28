@@ -47,6 +47,7 @@ class Updater:
             return "0.0.0"
 
     @handle_errors(log_file="update.log", text='download_and_extract_repo_archive')
+    @main_requires_admin
     def download_and_extract_repo_archive(self, archive_format, output_dir):
         archive_url = f"https://github.com/{self.username}/{self.repo}/archive/refs/heads/main.{archive_format}"
         headers = {"Authorization": f"Bearer {self.token}"}
@@ -57,7 +58,7 @@ class Updater:
                 file.write(response.content)
 
             with zipfile.ZipFile(archive_path, "r") as zip_ref:
-                extract_path = os.path.join(self.tmp_folder, self.repo)
+                extract_path = os.path.join(output_dir, self.repo)
                 zip_ref.extractall(extract_path)
 
             os.remove(archive_path)

@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtWidgets
+from PySide2 import QtWidgets
 
 from ui import QueryApp
 from utility_function import handle_errors

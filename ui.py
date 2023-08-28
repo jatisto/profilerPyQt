@@ -161,7 +161,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.btn_execute_query_opr.setObjectName("btn_execute_query_opr")
 
         UiTheme.set_icon_and_tooltip(self.btn_execute_query_opr, "icons/statistics.ico",
-                                     f"Статистика (ins upd del) в бд")
+                                     f"[Ctrl+Shift+Enter] - Статистика (ins upd del) в бд")
 
         self.btn_reset_stats = QPushButton(self)
         self.btn_reset_stats.clicked.connect(self.reset_stats)
@@ -528,13 +528,15 @@ class QueryApp(QMainWindow, UiTheme):
         # Изменение размера таблицы при изменении размера окна
         self.table_widget_results.horizontalHeader().setStretchLastSection(True)
 
-    def view_full_query(self, row, column):
+    def view_full_query(self, row, column, is_modal=False):
         try:
             if column == 0:
                 query = self.table_widget_results.item(row, column).text()
 
                 # Установите текст в виджете QTextEdit
                 self.text_edit_full_query.setPlainText(query)
+                if is_modal:
+                    pass
 
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения поиска: {e}")

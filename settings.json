@@ -6,7 +6,7 @@
             "port": "5432",
             "username": "postgres",
             "password": "123456",
-            "actual": true
+            "actual": false
         },
         {
             "dbname": "absolute_dev_wsl_u18_Actual",
@@ -31,6 +31,14 @@
             "username": "postgres",
             "password": "123456",
             "actual": false
+        },
+        {
+            "dbname": "ReleaseProdPkgV2",
+            "host": "localhost",
+            "port": "5432",
+            "username": "postgres",
+            "password": "123456",
+            "actual": true
         }
     ]
 }

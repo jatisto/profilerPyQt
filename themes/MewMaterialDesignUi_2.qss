@@ -2,7 +2,7 @@
 QWidget {
     font-family: "Lucida Console";
     font-size: 14px;
-    background-color: #333333; /* Тёмно-серый цвет */
+    background-color: #555555; /* Тёмно-серый цвет */
     margin: 0;
     padding: 0;
     color: #e7e7e7; /* Белый цвет текста */
@@ -41,7 +41,7 @@ QListView::item {
 
 /* Таблицы */
 QTableView {
-    background-color: #1E1E1E; /* Тёмно-серый цвет для таблиц */
+    background-color: #3E3E3E; /* Тёмно-серый цвет для таблиц */
     border: 1px solid #444444;
     border-radius: 4px;
 }
@@ -77,6 +77,12 @@ QTableView QAbstractItemView::item:selected {
 
 QTableView QAbstractItemView::item:selected:disabled {
     background-color: #444444;
+}
+
+/* Фон для QTextEdit */
+QTextEdit {
+    background-color: #3E3E3E; /* Светлее тёмно-серый цвет */
+    /* остальные стили */
 }
 
 /* Формы */

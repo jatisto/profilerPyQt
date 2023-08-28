@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set LOG_FILE=%ProgramFiles%\PgStatStatementsReaderQt5\bat_update_log.txt
+set "LOG_FILE=%ProgramFiles%\PgStatStatementsReaderQt5\bat_update_log.txt"
 
 echo Copying files from PgStatStatementsReaderQt5 to temporary folder >> %LOG_FILE%
 mkdir %TMP%\tmp_update_folder

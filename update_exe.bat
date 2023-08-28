@@ -24,4 +24,6 @@ if %errorlevel%==0 (
     rmdir /s /q tmp
 )
 
+start "" "%ProgramFiles%\PgStatStatementsReaderQt5\PgStatStatementsReaderQt5.exe"
+
 endlocal

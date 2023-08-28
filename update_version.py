@@ -1,16 +1,14 @@
-import base64
 import os
-import shutil
 import subprocess
 import zipfile
+from base64 import b64decode
 from distutils.version import LooseVersion
 from pathlib import Path
 
-import psutil
 import requests
 
 from settings import ConnectionSettings
-from utility_function import handle_errors, write_log
+from utility_function import handle_errors
 
 
 class Updater:
@@ -41,7 +39,7 @@ class Updater:
 
         if "content" in data:
             file_content = data["content"]
-            decoded_content = base64.b64decode(file_content).decode("utf-8")
+            decoded_content = b64decode(file_content).decode("utf-8")
             return decoded_content
         else:
             return "0.0.0"
@@ -83,36 +81,5 @@ class Updater:
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
-        os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
-        subprocess.run(["python", "setup.py", "bdist_msi"])
-        dist_folder = os.path.join("dist")
-        msi_files = [file for file in os.listdir(dist_folder) if file.endswith(".msi")]
-        if msi_files:
-            msi_path = os.path.join(dist_folder, msi_files[0])
-            cmd = ["msiexec", "/i", msi_path]  # "/qn" означает "тихая" установка без отображения окон
-            subprocess.run(cmd, check=True)
-        else:
-            return "Установочный файл не найден."
-
-        return "Обновление завершено."
-
-    @staticmethod
-    @handle_errors(log_file="update.log", text='remove_program')
-    def remove_program():
-        install_path = os.path.join(os.environ["APPDATA"], "Local", "Programs",
-                                    "PgProfilerQt5")  # Путь к установленной папке приложения
-
-        try:
-            for root, dirs, files in os.walk(install_path):
-                for file in files:
-                    if file not in ["settings.json", "auth.json"]:
-                        file_path = os.path.join(root, file)
-                        os.remove(file_path)  # Удаление файла
-
-                for dir in dirs:
-                    dir_path = os.path.join(root, dir)
-                    shutil.rmtree(dir_path)  # Удаление папки
-
-            write_log("Программа успешно удалена, оставив settings.json и auth.json.")
-        except Exception as e:
-            write_log("Произошла ошибка при удалении программы:", e)
+        os.chdir(os.path.join(self.tmp_folder, f"build"))
+        subprocess.run(["python", "update.py", "build"])

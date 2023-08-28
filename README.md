@@ -1,1 +1,1 @@
-# profilerPyQt
+# PgStatStatementsReaderQt5

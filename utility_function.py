@@ -1,47 +1,46 @@
+import os
 import datetime
 import traceback
 
+LOGS_DIR = "Logs"
 
-def handle_errors(log_file, text=''):
+
+def ensure_logs_dir():
+    if not os.path.exists(LOGS_DIR):
+        os.makedirs(LOGS_DIR, exist_ok=True)
+
+
+def write_log(level, text_log, log_file) -> None:
+    ensure_logs_dir()
+    formatted_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S,%f")
+    log_entry = f"{formatted_time} [{os.getpid()}] {level} {text_log}"
+    log_file_path = os.path.join(LOGS_DIR, log_file)
+    with open(log_file_path, 'a', encoding='utf-8') as log:
+        log.write(log_entry + '\n\n')  # Добавляем пустую строку после каждой записи
+
+
+def handle_errors(log_file, text='', level="ERROR"):
     def decorator(func):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception as exp:
+            except (Exception, KeyboardInterrupt) as exp:
                 error_msg = f"{text}\n{str(exp)}\n{traceback.format_exc()}"
-                with open(f"{log_file}", 'a', encoding='utf-8') as log:
-                    log.write(error_msg)
-                write_log(f"Произошла ошибка: {str(exp)}", f"{log_file}")
-                write_log(traceback.format_exc(), f"{log_file}")
-            except KeyboardInterrupt as exp:
-                error_msg: str = f"{text}\n{str(exp)}\n{traceback.format_exc()}"
-                with open(f"{log_file}", 'a', encoding='utf-8') as log:
-                    log.write(error_msg)
-                write_log(f"Произошла ошибка: {str(exp)}", f"{log_file}")
-                write_log(traceback.format_exc(), f"{log_file}")
+                write_log(level, error_msg, log_file)
 
         return wrapper
 
     return decorator
 
 
-def write_log(text_log, log_file="base_log_file.log") -> None:
-    with open(f"{log_file}", 'a', encoding='utf-8') as log:
-        log.write('\n')
-        log.write(f'{datetime.datetime.now()} - {text_log}\n')
-
-
-def basis_handle_errors(text=''):
+def basis_handle_errors(text='', level="ERROR"):
     def decorator(func):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception as exp:
+            except (Exception, KeyboardInterrupt) as exp:
                 error_msg = f"{text}\n{str(exp)}\n{traceback.format_exc()}"
-                with open('base_error_log.log', 'a', encoding='utf-8') as log:
-                    log.write(error_msg)
-                write_log(f"Произошла ошибка: {str(exp)}", 'base_error_log.log')
-                write_log(traceback.format_exc(), 'base_error_log.log')
+                write_log(level, error_msg, 'base_error_log.log')
 
         return wrapper
 

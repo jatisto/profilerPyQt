@@ -50,7 +50,7 @@ setup(
 )
 
 # Путь к вашему BAT файлу
-bat_file_path = os.path.join(os.path.dirname(__file__), "build_exe.bat")
+bat_file_path = os.path.join(os.path.dirname(__file__), "update_exe.bat")
 
 # Выполнение BAT файла
 subprocess.call(bat_file_path, shell=True)

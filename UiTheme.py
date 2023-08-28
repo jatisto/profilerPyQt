@@ -1,4 +1,3 @@
-from PySide2.QtWidgets import QPushButton, QApplication, QWidget
 from PySide2.QtGui import QIcon, QPixmap
 
 

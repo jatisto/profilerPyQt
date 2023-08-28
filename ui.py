@@ -1,10 +1,11 @@
-import re
 import threading
+from re import sub
 
 import psutil
 from PySide2.QtCore import (Qt)
-from PySide2.QtGui import (QColor, QIcon)
+from PySide2.QtGui import (QIcon)
 from PySide2.QtWidgets import *
+
 import Constants
 from UiTheme import UiTheme
 from database import DatabaseManager
@@ -175,7 +176,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.btn_reconnect_to_db.setObjectName("btn_reconnect_to_db")
 
         UiTheme.set_icon_and_tooltip_action(self.btn_reconnect_to_db, "icons/refresh-db.ico",
-                                     f"Переподключиться: {self.combo_dbname.currentText()}", "action_reconnect")
+                                            f"Переподключиться: {self.combo_dbname.currentText()}", "action_reconnect")
 
         self.btn_save_settings = QPushButton("Сохранить", self)
         self.btn_save_settings.clicked.connect(self.save_connection_settings)
@@ -274,7 +275,6 @@ class QueryApp(QMainWindow, UiTheme):
         self.table_widget_results.currentCellChanged.connect(self.view_full_query)
         # Назначьте экземпляр маркера переменной-члену для последующего доступа
         self.highlighter = highlighter
-
 
     def setting_input_fields(self):
         # Поля для настроек подключения
@@ -431,7 +431,7 @@ class QueryApp(QMainWindow, UiTheme):
 
     def search_query(self):
         if not self.is_not_setting:
-            self.show_error_message(self,"Ошибка", "Данные для подключения отсутствует.")
+            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
             return
 
         column = Constants.table_columns_default()
@@ -450,12 +450,12 @@ class QueryApp(QMainWindow, UiTheme):
                 self.statusBar().showMessage("Запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
-            self.show_error_message(self,"Ошибка выполнения запроса", e)
+            self.show_error_message(self, "Ошибка выполнения запроса", e)
             write_log(f"Ошибка выполнения запроса: {e}")
 
     def execute_custom_query(self):
         if not self.is_not_setting:
-            self.show_error_message(self,"Ошибка", "Данные для подключения отсутствует.")
+            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
             return
 
         self.reconnect_to_db()
@@ -467,7 +467,7 @@ class QueryApp(QMainWindow, UiTheme):
         at_least_one_non_empty = any(name and name.strip() for name in table_names)
 
         if not at_least_one_non_empty:
-            self.show_error_message(self,"Ошибка", "Все имена таблиц пусты")
+            self.show_error_message(self, "Ошибка", "Все имена таблиц пусты")
             return
 
         self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_ins_upt_del())
@@ -482,7 +482,7 @@ class QueryApp(QMainWindow, UiTheme):
                 self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
-            self.show_error_message(self,"Ошибка выполнения пользовательского запроса", e)
+            self.show_error_message(self, "Ошибка выполнения пользовательского запроса", e)
             write_log(f"Ошибка выполнения пользовательского запроса: {e}")
 
     def execute_selected_query(self):
@@ -502,7 +502,7 @@ class QueryApp(QMainWindow, UiTheme):
     def removing_line_breaks(results):
         def replace_line_breaks(text):
             # Заменяем переносы строк и табуляции на пробелы
-            return re.sub(r"[\n\t]+", " ", text)
+            return sub(r"[\n\t]+", " ", text)
 
         results = [list(row) for row in results]
         for row in results:

@@ -47,7 +47,6 @@ class Updater:
             return "0.0.0"
 
     @handle_errors(log_file="update.log", text='download_and_extract_repo_archive')
-    @main_requires_admin
     def download_and_extract_repo_archive(self, archive_format, output_dir):
         archive_url = f"https://github.com/{self.username}/{self.repo}/archive/refs/heads/main.{archive_format}"
         headers = {"Authorization": f"Bearer {self.token}"}

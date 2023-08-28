@@ -1,25 +1,26 @@
 @echo off
 setlocal
 
-REM Копирование файлов из PgStatStatementsReaderQt5 во временную папку
-robocopy "%ProgramFiles%\PgStatStatementsReaderQt5" "tmp" /e /copyall /purge
+echo Copying files from PgStatStatementsReaderQt5 to temporary folder
+mkdir tmp
+xcopy /s /y "%ProgramFiles%\PgStatStatementsReaderQt5\*" "tmp\"
 
-REM Закрытие процессов PgStatStatementsReaderQt5.exe
+echo Closing PgStatStatementsReaderQt5.exe processes
 taskkill /f /im PgStatStatementsReaderQt5.exe
 
-REM Замена файлов
-robocopy "build\PgStatStatementsReaderQt5" "%ProgramFiles%\PgStatStatementsReaderQt5" /e /copyall /purge
+echo Replacing files
+xcopy /s /y "build\PgStatStatementsReaderQt5\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
 
-REM Проверка на успешную замену файлов
+echo Checking for successful file replacement
 if %errorlevel%==0 (
-    REM Удаление временных файлов
+    echo Deleting temporary files
     rmdir /s /q tmp
-    REM Удаление временной папки два уровня ниже
+    echo Deleting temporary folder two levels up
     rmdir /s /q "..\..\tmp_update_folder"
 ) else (
-    REM Восстановление файлов из временной папки
-    robocopy "tmp" "%ProgramFiles%\PgStatStatementsReaderQt5" /e /copyall /purge
-    REM Удаление временных файлов
+    echo Restoring files from temporary folder
+    xcopy /s /y "tmp\*" "%ProgramFiles%\PgStatStatementsReaderQt5\"
+    echo Deleting temporary files
     rmdir /s /q tmp
 )
 

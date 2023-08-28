@@ -81,5 +81,5 @@ class Updater:
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
-        os.chdir(os.path.join(self.tmp_folder, f"build"))
+        os.chdir(os.path.join(self.tmp_folder, f"{self.repo}-main"))
         subprocess.run(["python", "update.py", "build"])

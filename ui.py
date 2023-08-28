@@ -125,7 +125,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.table_widget_results.setColumnCount(5)
 
         self.table_widget_results.setHorizontalHeaderLabels(
-            ["Запрос", "Ряды", "Вызовы", "Начало запроса", "Время запуска"]
+            ["Запрос", "Строки", "Вызовы", "Начало запроса", "Время запуска"]
         )
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)

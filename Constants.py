@@ -1,5 +1,5 @@
 class Constants:
-    table_columns_default = ["Запрос", "Ряды", "Вызовы", "Начало запроса", "Время запуска"]
+    table_columns_default = ["Запрос", "Строки", "Вызовы", "Начало запроса", "Время запуска"]
     table_columns_ins_upt_del = ["relname", "tup_ins", "tup_upd", "tup_del", "dead_tup"]
 
 

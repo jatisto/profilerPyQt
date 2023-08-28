@@ -5,7 +5,9 @@ from base64 import b64decode
 from distutils.version import LooseVersion
 from pathlib import Path
 
+import pyuac
 import requests
+from pyuac import main_requires_admin
 
 from settings import ConnectionSettings
 from utility_function import handle_errors
@@ -80,6 +82,7 @@ class Updater:
             return False
 
     @handle_errors(log_file="update.log", text='run_update')
+    @main_requires_admin
     def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         extract_path = os.path.join(self.tmp_folder, self.repo)

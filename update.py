@@ -50,8 +50,8 @@ setup(
     executables=executables
 )
 
-# Путь к вашему BAT файлу
-bat_file_path = os.path.join(os.path.dirname(__file__), "update_exe.bat")
+# Путь к файлу update_exe.ps1
+ps1_file_path = os.path.join(os.path.dirname(__file__), "update_exe.ps1")
 
-# Выполнение BAT файла
-subprocess.call(bat_file_path, shell=True)
+# Запуск PowerShell скрипта с правами администратора
+subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", ps1_file_path], shell=True)

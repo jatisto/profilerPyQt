@@ -80,9 +80,27 @@ class Updater:
         else:
             return is_update_available, self.local_version
 
+    @handle_errors(log_file="update.log", text='get_download_link')
+    def get_download_link(self):
+        releases_url = f"https://api.github.com/repos/{self.username}/{self.repo}/releases"
+        headers = {"Authorization": f"Bearer {self.token}"}
+        response = requests.get(releases_url, headers=headers)
+        releases = response.json()
+
+        if releases:
+            latest_release = releases[0]
+            latest_version = latest_release["tag_name"]
+            base_url = f"https://github.com/{self.username}/{self.repo}/releases/download"
+            file_name = "PgStatStatementsReaderQt5.exe"
+            url_to_download = f"{base_url}/{latest_version}/{file_name}"
+            return url_to_download
+        else:
+            return None
+
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         extract_path = os.path.join(self.tmp_folder, self.repo)
         os.chdir(os.path.join(extract_path, f"{self.repo}-main"))
-        subprocess.run(["python", "update.py", "build"], stdout=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW)
+        subprocess.run(["python", "update.py", "build"], stdout=subprocess.DEVNULL,
+                       creationflags=subprocess.CREATE_NO_WINDOW)

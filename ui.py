@@ -1,8 +1,8 @@
 import threading
 from re import sub
 
-from PySide2.QtCore import (Qt, QTimer)
-from PySide2.QtGui import (QIcon)
+from PySide2.QtCore import (Qt, QTimer, QUrl)
+from PySide2.QtGui import (QIcon, QDesktopServices)
 from PySide2.QtWidgets import *
 
 import Constants
@@ -187,13 +187,13 @@ class QueryApp(QMainWindow, UiTheme):
         UiTheme.set_icon_and_tooltip(self.btn_check_updates, "icons/update_check.ico",
                                      f"Проверьте наличие обновлений")
 
-        self.btn_update = QPushButton("Обновить", self)
-        self.btn_update.clicked.connect(self.update_application)
+        self.btn_update = QPushButton("Скачать", self)
+        self.btn_update.clicked.connect(self.loading_file)
         self.btn_update.setVisible(False)  # Hide the button initially
         self.btn_update.setObjectName("btn_update")
 
         UiTheme.set_icon_and_tooltip(self.btn_update, "icons/update.ico",
-                                     f"Обновить")
+                                     f"Скачать")
 
         self.btn_update.setVisible(False)
         self.btn_check_updates.setVisible(False)
@@ -623,13 +623,16 @@ class QueryApp(QMainWindow, UiTheme):
         if update_available:
             self.btn_update.setVisible(True)
             self.btn_check_updates.setVisible(False)
-            self.update_application_auto()
         else:
             self.statusBar().showMessage(f"Обновление отсутствует [{local_version}]")
 
     def update_application(self):
         threading.Thread(target=self.run_update_async).start()
         self.close()
+
+    def loading_file(self):
+        QDesktopServices.openUrl(QUrl(updater.get_download_link()))
+        QTimer.singleShot(200, lambda: self.btn_update.setVisible(False))
 
     def update_application_auto(self):
         QMessageBox.information(self, "Обновление", f"Доступна новая версия: {version_app}")

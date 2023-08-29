@@ -49,11 +49,11 @@ Try
 
     if ($filesExist)
     {
-        # Записать список файлов до копирования
-        Write-Output "Список файлов до копирования:" >> $LOG_FILE
-        Get-ChildItem "$env:ProgramFiles\PgStatStatementsReaderQt5\" | ForEach-Object {
-            Write-Output $_ >> $LOG_FILE
-        }
+#        # Записать список файлов до копирования
+#        Write-Output "Список файлов до копирования:" >> $LOG_FILE
+#        Get-ChildItem "$env:ProgramFiles\PgStatStatementsReaderQt5\" | ForEach-Object {
+#            Write-Output $_ >> $LOG_FILE
+#        }
 
         Write-Output "Replacing files" >> $LOG_FILE
         Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force

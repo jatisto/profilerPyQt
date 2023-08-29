@@ -25,9 +25,9 @@ if ($LASTEXITCODE -eq 0) {
     Remove-Item -Path $TMP_INSTALL -Recurse -Force
 } else {
     Write-Output "Restoring files from temporary folder" >> $LOG_FILE
-    Copy-Item -Path "$TMP_UPDATE_FOLDER\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
+    Copy-Item -Path "$TMP_INSTALL\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
     Write-Output "Deleting temporary files" >> $LOG_FILE
-    Remove-Item -Path $TMP_UPDATE_FOLDER -Recurse -Force
+    Remove-Item -Path $TMP_INSTALL -Recurse -Force
 }
 
 Write-Output "Running PgStatStatementsReaderQt5.exe" >> $LOG_FILE

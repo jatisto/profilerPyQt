@@ -39,12 +39,16 @@ $newVersion = "$major.$minor.$patch"
 # Запись новой версии обратно в файл
 $newVersion | Set-Content -Path $versionFilePath
 
+# Устанавливаем персональный токен для аутентификации
+git config --global credential.helper "store --file=.git/credentials" # Это сохранит учетные данные в файл .git/credentials
+git config --global credential.GitHub.com $token:x-oauth-basic
+
 # Коммит измененного файла версии
 try {
     git add $versionFilePath
     git commit -m "Update version to $newVersion"
-    # Устанавливаем токен как заголовок для авторизации
-    git -c http.extraheader="Authorization: token $token" push origin main
+    # Пушим изменения, токен будет использован для аутентификации
+    git push origin main
 } catch {
     Write-Host "Failed to commit version change: $_"
 }

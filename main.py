@@ -1,7 +1,6 @@
 import sys
 
 from PySide2 import QtWidgets
-from pyuac import main_requires_admin
 
 from ui import QueryApp
 from utility_function import handle_errors

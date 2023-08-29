@@ -1,4 +1,13 @@
-$LOG_FILE = "$env:TMP\log_tmp\tmp_bat_update_log.txt"
+$TMP_LOG_FILE = Join-Path $env:TMP "log_tmp"
+
+# Проверка наличия папки tmp_install
+if (-not(Test-Path -Path $TMP_LOG_FILE))
+{
+    New-Item -ItemType Directory -Path $TMP_LOG_FILE
+}
+
+$LOG_FILE = "$TMP_LOG_FILE\tmp_bat_update_log.txt"
+
 Try
 {
     Write-Output "-----------------------------------------------------------------" >> $LOG_FILE

@@ -28,7 +28,7 @@ if ($matchingProcesses.Count -gt 0) {
 
 
 Write-Output "Replacing files" >> $LOG_FILE
-Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\PgStatStatementsReaderQt5\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
+Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
 
 Write-Output "Checking for successful file replacement" >> $LOG_FILE
 if ($LASTEXITCODE -eq 0) {

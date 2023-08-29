@@ -43,7 +43,8 @@ $newVersion | Set-Content -Path $versionFilePath
 try {
     git add $versionFilePath
     git commit -m "Update version to $newVersion"
-    git push origin main
+    # Устанавливаем токен как заголовок для авторизации
+    git -c http.extraheader="Authorization: token $token" push origin main
 } catch {
     Write-Host "Failed to commit version change: $_"
 }

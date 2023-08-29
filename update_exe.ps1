@@ -47,15 +47,29 @@ Try
 
     if ($filesExist)
     {
+        # Записать список файлов до копирования
+        Write-Output "Список файлов до копирования:" >> $LOG_FILE
+        Get-ChildItem "$env:ProgramFiles\PgStatStatementsReaderQt5\" | ForEach-Object {
+            Write-Output $_ >> $LOG_FILE
+        }
+
         Write-Output "Replacing files" >> $LOG_FILE
         Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
+
+        # Записать список файлов после копирования
+        Write-Output "Список файлов после копирования:" >> $LOG_FILE
+        Get-ChildItem "$env:ProgramFiles\PgStatStatementsReaderQt5\" | ForEach-Object {
+            Write-Output $_ >> $LOG_FILE
+        }
+
+        Write-Output "Checking for successful file replacement" >> $LOG_FILE
+
     }
     else
     {
         Write-Output "No files to copy" >> $LOG_FILE
     }
 
-    Write-Output "Checking for successful file replacement" >> $LOG_FILE
     if ($LASTEXITCODE -eq 0)
     {
         Write-Output "Deleting temporary files" >> $LOG_FILE

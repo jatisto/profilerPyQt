@@ -2,7 +2,7 @@ import os
 import subprocess
 from sys import platform
 from cx_Freeze import setup, Executable
-
+import Constants
 from update_version import Updater
 
 base = None
@@ -25,12 +25,7 @@ executables: list[Executable] = [
     )]
 
 # Список файлов для включения в сборку
-include_files = [
-    ("themes", "themes"),
-    ("icons", "icons"),
-    ("version.txt", "version.txt"),
-    ("auth.json", "auth.json")
-]
+include_files = Constants.list_include()
 
 # Параметры для создания установщика
 options = {
@@ -49,14 +44,11 @@ setup(
     executables=executables
 )
 
-# Путь к вашему BAT файлу
+# Creating an installation file
 bat_file_path = os.path.join(os.path.dirname(__file__), "build_exe.bat")
-
-# Выполнение BAT файла
 subprocess.call(bat_file_path, shell=True)
 
-# Путь к файлу update_exe.ps1
+# Release
 ps1_file_path = os.path.join(os.path.dirname(__file__), "release_for_git.ps1")
-
-# Запуск PowerShell скрипта с правами администратора и скрытым окном
-subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", ps1_file_path], shell=True)
+subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", ps1_file_path],
+               shell=True)

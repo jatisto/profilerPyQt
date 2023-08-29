@@ -3,6 +3,7 @@ import subprocess
 from sys import platform
 from cx_Freeze import setup, Executable
 
+import Constants
 from update_version import Updater
 
 base = None
@@ -26,12 +27,7 @@ executables: list[Executable] = [
     )]
 
 # Список файлов для включения в сборку
-include_files = [
-    ("themes", "themes"),
-    ("icons", "icons"),
-    ("version.txt", "version.txt"),
-    ("auth.json", "auth.json")
-]
+include_files = Constants.list_include()
 
 # Параметры для создания установщика
 options = {

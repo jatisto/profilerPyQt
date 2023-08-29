@@ -3,6 +3,15 @@ class Constants:
     table_columns_ins_upt_del = ["relname", "tup_ins", "tup_upd", "tup_del", "dead_tup"]
 
 
+def list_include() -> object:
+    return [
+        ("themes", "themes"),
+        ("icons", "icons"),
+        ("version.txt", "version.txt"),
+        ("auth.json", "auth.json")
+    ]
+
+
 def table_columns_default():
     return Constants.table_columns_default
 

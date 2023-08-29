@@ -7,13 +7,23 @@ $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
 Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
 
 Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
-Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object {
+
+# Получаем список процессов PgStatStatementsReaderQt5
+$pgStatProcesses = Get-Process -Name "PgStatStatementsReaderQt5"
+
+# Пробуем закрыть главные окна всех процессов
+$pgStatProcesses | ForEach-Object {
     $_.CloseMainWindow()
-    $_.WaitForExit()
+}
+
+# Ожидаем завершения всех процессов
+$pgStatProcesses | ForEach-Object {
+    $_.WaitForExit(5000) # Максимальное время ожидания в миллисекундах
     if (!$_.HasExited) {
         $_ | Stop-Process -Force
     }
 }
+
 
 Write-Output "Replacing files" >> $LOG_FILE
 Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\PgStatStatementsReaderQt5\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force

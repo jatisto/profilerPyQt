@@ -1,5 +1,7 @@
 $LOG_FILE = "$env:ProgramFiles\PgStatStatementsReaderQt5\bat_update_log.txt"
 
+Write-Output "-----------------------------------------------------------------------------------------------------" >> $LOG_FILE
+
 Write-Output "Copying files from PgStatStatementsReaderQt5 to temporary folder" >> $LOG_FILE
 $TMP_UPDATE_FOLDER = Join-Path $env:TMP "tmp_update_folder"
 $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
@@ -27,8 +29,14 @@ if ($matchingProcesses.Count -gt 0) {
 }
 
 
-Write-Output "Replacing files" >> $LOG_FILE
-Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
+$filesExist = Test-Path -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*"
+
+if ($filesExist) {
+    Write-Output "Replacing files" >> $LOG_FILE
+    Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
+} else {
+    Write-Output "No files to copy" >> $LOG_FILE
+}
 
 Write-Output "Checking for successful file replacement" >> $LOG_FILE
 if ($LASTEXITCODE -eq 0) {
@@ -40,6 +48,7 @@ if ($LASTEXITCODE -eq 0) {
     Copy-Item -Path "$TMP_INSTALL\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
     Write-Output "Deleting temporary files after recovery" >> $LOG_FILE
     Remove-Item -Path $TMP_INSTALL -Recurse -Force
+    Remove-Item -Path $TMP_UPDATE_FOLDER -Recurse -Force
 }
 
 Write-Output "Running PgStatStatementsReaderQt5.exe" >> $LOG_FILE

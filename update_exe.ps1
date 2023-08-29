@@ -3,11 +3,17 @@ $LOG_FILE = "$env:ProgramFiles\PgStatStatementsReaderQt5\bat_update_log.txt"
 Write-Output "Copying files from PgStatStatementsReaderQt5 to temporary folder" >> $LOG_FILE
 $TMP_UPDATE_FOLDER = Join-Path $env:TMP "tmp_update_folder"
 $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
-New-Item -ItemType Directory -Path $TMP_UPDATE_FOLDER -Force
+
 Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
 
 Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
-Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object { $_.CloseMainWindow() | Out-Null; $_.WaitForExit() }
+Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object {
+    $_.CloseMainWindow()
+    $_.WaitForExit()
+    if (!$_.HasExited) {
+        $_ | Stop-Process -Force
+    }
+}
 
 Write-Output "Replacing files" >> $LOG_FILE
 Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\PgStatStatementsReaderQt5\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force

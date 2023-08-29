@@ -43,7 +43,7 @@ $newVersion | Set-Content -Path $versionFilePath
 try {
     git add $versionFilePath
     git commit -m "Update version to $newVersion"
-#    git push origin main
+    git push origin main
 } catch {
     Write-Host "Failed to commit version change: $_"
 }

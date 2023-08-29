@@ -41,6 +41,8 @@ try {
         exit
     }
 
+     Write-Host "https://api.github.com/repos/$username/$repo/releases"
+
     # Создание релиза
     $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$username/$repo/releases" -Method Post -Headers @{
         Authorization = "token $token"
@@ -60,4 +62,7 @@ try {
     Write-Host "THE_FILE_WAS_SUCCESSFULLY_UPLOADED_TO_THE_RELEASE $releaseTag."
 } catch {
     Write-Host "AN ERROR HAS OCCURRED: $_"
+    $errorMessage = "ERROR: $_"
+    $errorMessage
+    $Error[0]
 }

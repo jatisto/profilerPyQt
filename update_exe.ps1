@@ -4,6 +4,12 @@ Write-Output "Copying files from PgStatStatementsReaderQt5 to temporary folder" 
 $TMP_UPDATE_FOLDER = Join-Path $env:TMP "tmp_update_folder"
 $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
 
+# Проверка наличия папки tmp_install
+if (-not (Test-Path -Path $TMP_INSTALL)) {
+    Write-Output "Creating tmp_install folder" >> $LOG_FILE
+    New-Item -ItemType Directory -Path $TMP_INSTALL
+}
+
 Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
 
 $processName = "PgStatStatementsReaderQt5.exe"

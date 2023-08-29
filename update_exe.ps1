@@ -6,14 +6,14 @@ $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
 
 Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
 
-#Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
-#Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object {
-#    $_.CloseMainWindow()
-#    $_.WaitForExit()
-#    if (!$_.HasExited) {
-#        $_ | Stop-Process -Force
-#    }
-#}
+Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
+Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object {
+    $_.CloseMainWindow()
+    $_.WaitForExit()
+    if (!$_.HasExited) {
+        $_ | Stop-Process -Force
+    }
+}
 
 Write-Output "Replacing files" >> $LOG_FILE
 Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\PgStatStatementsReaderQt5\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
@@ -26,7 +26,7 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Output "Restoring files from temporary folder" >> $LOG_FILE
     Copy-Item -Path "$TMP_INSTALL\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force
-    Write-Output "Deleting temporary files" >> $LOG_FILE
+    Write-Output "Deleting temporary files after recovery" >> $LOG_FILE
     Remove-Item -Path $TMP_INSTALL -Recurse -Force
 }
 

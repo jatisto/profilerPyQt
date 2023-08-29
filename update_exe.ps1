@@ -93,7 +93,10 @@ Try
 }
 Catch
 {
-    Write-Output "Ошибка: $_" >> $LOG_FILE
-    Write-Output "Ошибка: $_"
+    $errorMessage = "Ошибка: $_"
+    $errorMessage | Out-File -Append -FilePath $LOG_FILE
+    $errorMessage
+    $Error[0] | Out-File -Append -FilePath $LOG_FILE
+    $Error[0]
     # Дополнительная обработка ошибки
 }

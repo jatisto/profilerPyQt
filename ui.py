@@ -14,6 +14,7 @@ from update_version import Updater
 from utility_function import handle_errors, write_log
 
 updater = Updater()
+version_app = updater.get_remote_version()
 
 
 @handle_errors(log_file="ui.log", text='QueryApp')
@@ -227,11 +228,11 @@ class QueryApp(QMainWindow, UiTheme):
         btn_layout.addWidget(self.btn_execute_query_opr)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(separator)
+        btn_layout.addWidget(self.btn_execute_query)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_check_updates)
         btn_layout.addWidget(self.btn_update)
-        btn_layout.addWidget(separator)
-        btn_layout.addWidget(separator)
-        btn_layout.addWidget(self.btn_execute_query)
         btn_layout.addStretch()
 
         # Внутри метода init_ui измените создание виджета QTextEdit, чтобы сделать его редактируемым.
@@ -617,17 +618,20 @@ class QueryApp(QMainWindow, UiTheme):
         error_box.exec_()
 
     def check_for_updates(self):
-        update_available, version_app = updater.check_update()
+        update_available, local_version = updater.check_update()
 
         if update_available:
             self.btn_update.setVisible(True)
             self.btn_check_updates.setVisible(False)
             self.update_application()
         else:
-            self.statusBar().showMessage(f"Обновление отсутствует [{version_app}]")
+            self.statusBar().showMessage(f"Обновление отсутствует [{local_version}]")
 
     def update_application(self):
-        version_app = updater.get_remote_version()
+        threading.Thread(target=self.run_update_async).start()
+        self.close()
+
+    def update_application_auto(self):
         QMessageBox.information(self, "Обновление", f"Доступна новая версия: {version_app}")
         reply = QMessageBox.question(self, 'Обновить?', 'Для обновления требуется закрыть приложение.<br>'
                                                         'После обновление приложение будет запущенно заново.<br><br>'

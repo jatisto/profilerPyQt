@@ -50,7 +50,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.tray_menu = None
         self.tray_icon = None
         self.is_not_setting = None
-        self.setWindowTitle("Интерфейс для работы с pg_stat_statements")
+        self.setWindowTitle(f"Интерфейс для работы с pg_stat_statements v{version_app}")
         self.setGeometry(100, 100, 1200, 800)
 
         self.db_connection = None
@@ -623,8 +623,6 @@ class QueryApp(QMainWindow, UiTheme):
         if update_available:
             self.btn_update.setVisible(True)
             self.btn_check_updates.setVisible(False)
-        else:
-            self.statusBar().showMessage(f"Обновление отсутствует [{local_version}]")
 
     def update_application(self):
         threading.Thread(target=self.run_update_async).start()

@@ -11,8 +11,11 @@ Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
 # Получаем список процессов PgStatStatementsReaderQt5
 $pgStatProcesses = Get-Process -Name "PgStatStatementsReaderQt5"
 
+Write-Output $pgStatProcesses >> $LOG_FILE
+
 # Пробуем закрыть главные окна всех процессов
 $pgStatProcesses | ForEach-Object {
+    Write-Output "Пробуем закрыть главные окна всех процессов" >> $LOG_FILE
     $_.CloseMainWindow()
 }
 
@@ -20,6 +23,7 @@ $pgStatProcesses | ForEach-Object {
 $pgStatProcesses | ForEach-Object {
     $_.WaitForExit(5000) # Максимальное время ожидания в миллисекундах
     if (!$_.HasExited) {
+        Write-Output $_.HasExited >> $LOG_FILE
         $_ | Stop-Process -Force
     }
 }

@@ -8,6 +8,8 @@ if (-not(Test-Path -Path $TMP_LOG_FILE))
 
 $LOG_FILE = "$TMP_LOG_FILE\tmp_bat_update_log.txt"
 
+Write-Output "Creating log_tmp folder" >> $LOG_FILE
+
 Try
 {
     Write-Output "-----------------------------------------------------------------" >> $LOG_FILE

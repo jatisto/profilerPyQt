@@ -1,4 +1,4 @@
-$LOG_FILE = "$env:ProgramFiles\PgStatStatementsReaderQt5\bat_update_log.txt"
+$LOG_FILE = "$env:TMP\log_tmp\tmp_bat_update_log.txt"
 Try
 {
     Write-Output "-----------------------------------------------------------------" >> $LOG_FILE

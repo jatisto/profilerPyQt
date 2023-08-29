@@ -6,14 +6,20 @@ $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
 
 Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
 
-Write-Output "Closing PgStatStatementsReaderQt5.exe processes" >> $LOG_FILE
-Get-Process -Name "PgStatStatementsReaderQt5" | ForEach-Object {
-    $_.CloseMainWindow()
-    $_.WaitForExit()
-    if (!$_.HasExited) {
-        $_ | Stop-Process -Force
+$processName = "PgStatStatementsReaderQt5.exe"
+
+$matchingProcesses = Get-Process | Where-Object { $_.Path -like "*$processName" }
+
+if ($matchingProcesses.Count -gt 0) {
+    Write-Host "Найдено процессов: $($matchingProcesses.Count)"
+    foreach ($process in $matchingProcesses) {
+        Write-Host "Закрытие процесса с ID $($process.Id), Имя: $($process.Name), Путь: $($process.Path)"
+        $process.Kill()
     }
+} else {
+    Write-Host "Процессы с именем $processName не найдены."
 }
+
 
 Write-Output "Replacing files" >> $LOG_FILE
 Copy-Item -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\PgStatStatementsReaderQt5\*" -Destination "$env:ProgramFiles\PgStatStatementsReaderQt5\" -Recurse -Force

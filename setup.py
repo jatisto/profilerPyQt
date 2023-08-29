@@ -40,6 +40,7 @@ setup(
     name="PgStatStatementsReaderQt5",
     version=new_version,  # Используйте новую версию
     description=f"Интерфейс для работы с pg_stat_statements. v.{new_version}",
+    author="Eugene Abdyushev",
     options=options,
     executables=executables
 )

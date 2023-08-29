@@ -1,6 +1,6 @@
 $LOG_FILE = "$env:ProgramFiles\PgStatStatementsReaderQt5\bat_update_log.txt"
 
-Write-Output "-----------------------------------------------------------------------------------------------------" >> $LOG_FILE
+Write-Output "-----------------------------------------------------------------" >> $LOG_FILE
 
 Write-Output "Copying files from PgStatStatementsReaderQt5 to temporary folder" >> $LOG_FILE
 $TMP_UPDATE_FOLDER = Join-Path $env:TMP "tmp_update_folder"
@@ -27,7 +27,6 @@ if ($matchingProcesses.Count -gt 0) {
 } else {
     Write-Host "Процессы с именем $processName не найдены."
 }
-
 
 $filesExist = Test-Path -Path "$TMP_UPDATE_FOLDER\profilerPyQt\profilerPyQt-main\build\*"
 

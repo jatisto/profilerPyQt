@@ -39,11 +39,16 @@ $newVersion = "$major.$minor.$patch"
 # Запись новой версии обратно в файл
 $newVersion | Set-Content -Path $versionFilePath
 
-# Создание параметров релиза
-$releaseTag = "v$newVersion"
+# Коммит измененного файла версии
+try {
+    git add $versionFilePath
+    git commit -m "Update version to $newVersion"
+} catch {
+    Write-Host "Failed to commit version change: $_"
+}
 
 # Создание параметров релиза
-$releaseTag = "v$version"
+$releaseTag = "v$newVersion"
 $releaseParams = @{
     tag_name = $releaseTag
     target_commitish = "main"

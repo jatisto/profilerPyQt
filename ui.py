@@ -1,8 +1,7 @@
 import threading
 from re import sub
 
-import psutil
-from PySide2.QtCore import (Qt)
+from PySide2.QtCore import (Qt, QTimer)
 from PySide2.QtGui import (QIcon)
 from PySide2.QtWidgets import *
 
@@ -14,34 +13,7 @@ from sql_highlighter import SQLHighlighter
 from update_version import Updater
 from utility_function import handle_errors, write_log
 
-
-def set_button_color(button, background_color, text_color="color: white;", font_family="MesloLGS NF", is_disable=False):
-    # Сохраняем текущие базовые стили кнопки
-    current_style = button.styleSheet()
-
-    # Создаем новый стиль на основе текущих базовых стилей
-    new_style = f"{current_style} background-color: {background_color.name()}; {text_color}; font-family: {font_family};"
-
-    if not is_disable:
-        new_style += " background-color: #E0E0E0;"
-
-    # Применяем новый стиль
-    button.setStyleSheet(new_style)
-
-
 updater = Updater()
-
-
-def terminate_conflicting_processes():
-    conflicting_processes = ["PgProfilerQt5.exe"]
-    for process in psutil.process_iter():
-        try:
-            process_info = process.as_dict(attrs=['pid', 'name'])
-            if process_info['name'] in conflicting_processes:
-                write_log(f"Terminating process {process_info['name']} (PID: {process_info['pid']})")
-                psutil.Process(process_info['pid']).terminate()
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
 
 
 @handle_errors(log_file="ui.log", text='QueryApp')
@@ -94,6 +66,13 @@ class QueryApp(QMainWindow, UiTheme):
 
         self.load_connection_settings()
         self.connect_to_db()
+
+    def delayed_check_for_updates(self):
+        self.check_for_updates()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        QTimer.singleShot(500, self.delayed_check_for_updates)
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -214,6 +193,9 @@ class QueryApp(QMainWindow, UiTheme):
 
         UiTheme.set_icon_and_tooltip(self.btn_update, "icons/update.ico",
                                      f"Обновить")
+
+        self.btn_update.setVisible(False)
+        self.btn_check_updates.setVisible(False)
 
         settings_widget = QWidget(self)
         settings_widget.setLayout(settings_layout)
@@ -635,17 +617,29 @@ class QueryApp(QMainWindow, UiTheme):
         error_box.exec_()
 
     def check_for_updates(self):
-        is_new_version_available = updater.check_update()
+        update_available, version_app = updater.check_update()
 
-        if is_new_version_available:
-            self.btn_update.setVisible(True)  # Show the "Update" button
-            self.btn_check_updates.setVisible(False)  # Show the "Update" button
+        if update_available:
+            self.btn_update.setVisible(True)
+            self.btn_check_updates.setVisible(False)
+            self.update_application()
         else:
-            QMessageBox.information(self, "Обновление отсутствует", "У вас уже установлена последняя версия.")
+            self.statusBar().showMessage(f"Обновление отсутствует [{version_app}]")
 
     def update_application(self):
-        threading.Thread(target=self.run_update_async).start()
-        self.close()
+        version_app = updater.get_remote_version()
+        QMessageBox.information(self, "Обновление", f"Доступна новая версия: {version_app}")
+        reply = QMessageBox.question(self, 'Обновить?', 'Для обновления требуется закрыть приложение.<br>'
+                                                        'После обновление приложение будет запущенно заново.<br><br>'
+                                                        'Вы уверенны, что хотите закрыть приложение?',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            threading.Thread(target=self.terminate_and_run_update).start()
+            self.close()
+        else:
+            self.btn_update.setVisible(False)
+            self.btn_check_updates.setVisible(True)
 
     @staticmethod
     def run_update_async():

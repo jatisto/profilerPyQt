@@ -74,10 +74,11 @@ class Updater:
     def check_update(self):
         remote_version = self.get_remote_version()
 
-        if LooseVersion(remote_version) > LooseVersion(self.local_version):
-            return True
+        is_update_available = LooseVersion(remote_version) > LooseVersion(self.local_version)
+        if is_update_available:
+            return is_update_available, remote_version
         else:
-            return False
+            return is_update_available, self.local_version
 
     @handle_errors(log_file="update.log", text='run_update')
     def run_update(self):

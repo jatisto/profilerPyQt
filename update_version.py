@@ -85,4 +85,4 @@ class Updater:
         self.download_and_extract_repo_archive("zip", self.tmp_folder)
         extract_path = os.path.join(self.tmp_folder, self.repo)
         os.chdir(os.path.join(extract_path, f"{self.repo}-main"))
-        subprocess.run(["python", "update.py", "build"], stdout=subprocess.DEVNULL)
+        subprocess.run(["python", "update.py", "build"], stdout=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW)

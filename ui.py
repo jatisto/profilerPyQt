@@ -623,7 +623,7 @@ class QueryApp(QMainWindow, UiTheme):
         if update_available:
             self.btn_update.setVisible(True)
             self.btn_check_updates.setVisible(False)
-            self.update_application()
+            self.update_application_auto()
         else:
             self.statusBar().showMessage(f"Обновление отсутствует [{local_version}]")
 

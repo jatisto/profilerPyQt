@@ -76,8 +76,8 @@ Try
     }
 
     Write-Output "Running PgStatStatementsReaderQt5.exe" >> $LOG_FILE
+    Remove-Item -Path $TMP_LOG_FILE -Recurse -Force
     Start-Process -FilePath "$env:ProgramFiles\PgStatStatementsReaderQt5\PgStatStatementsReaderQt5.exe"
-
 }
 Catch
 {

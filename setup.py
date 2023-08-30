@@ -6,6 +6,8 @@ from cx_Freeze import setup, Executable
 import Constants
 from update_version import Updater
 
+name_app = 'PgSSR'
+
 # Создаем парсер аргументов
 parser = argparse.ArgumentParser(description='Build script with version type')
 parser.add_argument('--ver', dest='version_type', choices=['major', 'minor', 'patch'],
@@ -46,9 +48,10 @@ executables: list[Executable] = [
     Executable(
         "main.py",
         base=base,
-        target_name=f"PgStatStatementsReaderQt5.exe",
+        target_name=f"{name_app}.exe",
         icon='icons/icon.ico',
-        shortcut_name='PgStatStatementsReaderQt5',
+        copyright='Copyright © 2023 iam@eabdyushev@ru Eugene Abdyushev',
+        shortcut_name=f"{name_app}",
         shortcut_dir="ProgramMenuFolder"
     )]
 
@@ -65,13 +68,17 @@ options = {
 }
 
 setup(
-    name="PgStatStatementsReaderQt5",
+    name=f"{name_app}",
     version=new_version,  # Используйте новую версию
     description=f"Интерфейс для работы с pg_stat_statements. v.{new_version}",
-    author="Eugene Abdyushev",
+    author="Евгений Абдюшев",
     options=options,
     executables=executables
 )
+
+# Записать новую версию в файл build/version.txt
+with open("build/version.txt", "w") as version_file:
+    version_file.write(new_version)
 
 # Creating an installation file
 bat_file_path = os.path.join(os.path.dirname(__file__), "build_exe.bat")

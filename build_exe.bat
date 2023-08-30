@@ -9,7 +9,7 @@ rem Запуск скрипта инсталлятора
 "C:\Program Files (x86)\Inno Setup 6\iscc.exe" %installer_script%
 
 rem Удаление папки build
-rmdir /s /q "build"
+rem rmdir /s /q "build"
 
 echo Successful!
 

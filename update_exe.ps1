@@ -15,7 +15,7 @@ Try
 {
     Write-Output "-----------------------------------------------------------------" >> $LOG_FILE
 
-    Write-Output "Copying files from PgStatStatementsReaderQt5 to temporary folder" >> $LOG_FILE
+    Write-Output "Copying files from PgSSR to temporary folder" >> $LOG_FILE
     $TMP_UPDATE_FOLDER = Join-Path $env:TMP "tmp_update_folder"
     $TMP_INSTALL = Join-Path $env:TMP "tmp_install"
 
@@ -26,7 +26,7 @@ Try
         New-Item -ItemType Directory -Path $TMP_INSTALL
     }
 
-    Copy-Item -Path "$env:ProgramFiles\PgStatStatementsReaderQt5\*" -Destination $TMP_INSTALL -Recurse -Force
+    Copy-Item -Path "$env:ProgramFiles\PgSSR\*" -Destination $TMP_INSTALL -Recurse -Force
 
     $processName = "PgStatStatementsReaderQt5.exe"
 

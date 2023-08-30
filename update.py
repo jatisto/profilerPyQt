@@ -19,9 +19,9 @@ executables: list[Executable] = [
     Executable(
         "main.py",
         base=base,
-        target_name=f"PgStatStatementsReaderQt5.exe",
+        target_name=f"PgSSR.exe",
         icon='icons/icon.ico',
-        shortcut_name='PgStatStatementsReaderQt5',
+        shortcut_name='PgSSR',
         shortcut_dir="ProgramMenuFolder",
         uac_admin=True
     )]
@@ -39,7 +39,7 @@ options = {
 }
 
 setup(
-    name="PgStatStatementsReaderQt5",
+    name="PgSSR",
     version=new_version,  # Используйте новую версию
     description=f"Интерфейс для работы с pg_stat_statements. v.{new_version}",
     options=options,

@@ -7,7 +7,7 @@ Write-Host "Received new version: $newVersion_py"
 
 $authFilePath = ".\auth.json"
 $versionFilePath = ".\version.txt"
-$fileToUpload = ".\dist\PgStatStatementsReaderQt5.exe"
+$fileToUpload = ".\dist\PgSSR.exe"
 
 # Проверка существования файла с данными авторизации
 if (-not (Test-Path -Path $authFilePath -PathType Leaf)) {
@@ -70,7 +70,7 @@ try {
     # Получение ID созданного релиза
     $releaseId = $release.id
 
-    $uploadUrl = "https://uploads.github.com/repos/$username/$repo/releases/$releaseId/assets?name=PgStatStatementsReaderQt5.exe"
+    $uploadUrl = "https://uploads.github.com/repos/$username/$repo/releases/$releaseId/assets?name=PgSSR.exe"
 
     # Загрузка файла в релиз
     $uploadResponse = Invoke-RestMethod -Uri $uploadUrl -Method Post -Headers @{

@@ -1,1 +1,1 @@
-# PgStatStatementsReaderQt5
+# PgSSR

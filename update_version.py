@@ -74,6 +74,7 @@ class Updater:
     def check_update(self):
         remote_version = self.get_remote_version()
         remote_version = remote_version.strip()
+        self.local_version = self.local_version.strip()
         is_update_available = LooseVersion(remote_version) > LooseVersion(self.local_version)
         if is_update_available:
             return is_update_available, remote_version
@@ -91,7 +92,7 @@ class Updater:
             latest_release = releases[0]
             latest_version = latest_release["tag_name"]
             base_url = f"https://github.com/{self.username}/{self.repo}/releases/download"
-            file_name = "PgStatStatementsReaderQt5.exe"
+            file_name = "PgSSR.exe"
             url_to_download = f"{base_url}/{latest_version}/{file_name}"
             return url_to_download
         else:

@@ -1,6 +1,6 @@
-#define MyAppName "PgStatStatementsReaderQt5"
-#define MyAppExeName "PgStatStatementsReaderQt5.exe"
-#define ApplicationVersion GetVersionNumbersString('PgStatStatementsReaderQt5.exe')
+#define MyAppName "PgSSR"
+#define MyAppExeName "PgSSR.exe"
+#define ApplicationVersion GetVersionNumbersString('PgSSR.exe')
 
 [Setup]
 AppId = "3502D097-DF67-49DD-X98X-59F0866127QQ"
@@ -14,6 +14,8 @@ OutputDir=dist
 OutputBaseFilename={#MyAppName}
 Compression=lzma
 SolidCompression=yes
+AppPublisher = "Εβγενθι ΐαδώψεβ"
+AppCopyright = "Copyright © 2023 iam@eabdyushev@ru Eugene Abdyushev"
 
 [Files]
 Source: "build\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

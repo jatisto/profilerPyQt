@@ -52,7 +52,8 @@ executables: list[Executable] = [
         icon='icons/icon.ico',
         copyright='Copyright © 2023 iam@eabdyushev@ru Eugene Abdyushev',
         shortcut_name=f"{name_app}",
-        shortcut_dir="ProgramMenuFolder"
+        shortcut_dir="ProgramMenuFolder",
+        uac_admin=True
     )]
 
 # Список файлов для включения в сборку

@@ -73,7 +73,7 @@ class Updater:
     @handle_errors(log_file="update.log", text='check_update')
     def check_update(self):
         remote_version = self.get_remote_version()
-
+        remote_version = remote_version.strip()
         is_update_available = LooseVersion(remote_version) > LooseVersion(self.local_version)
         if is_update_available:
             return is_update_available, remote_version

@@ -1,3 +1,10 @@
+param(
+    [string]$newVersion_py
+)
+
+# Теперь $newVersion содержит переданную версию, которую вы можете использовать в скрипте
+Write-Host "Received new version: $newVersion_py"
+
 $authFilePath = ".\auth.json"
 $versionFilePath = ".\version.txt"
 $fileToUpload = ".\dist\PgStatStatementsReaderQt5.exe"
@@ -15,26 +22,8 @@ $username = $authData.Auth.username
 $token = $authData.Auth.token
 $repo = $authData.Auth.repo
 
-# Проверка существования файла с версией
-if (-not (Test-Path -Path $versionFilePath -PathType Leaf)) {
-    Write-Host "File '$versionFilePath' not found."
-    exit
-}
-
-# Чтение текущей версии из файла
-$currentVersion = Get-Content -Raw -Path $versionFilePath
-
-# Разбиение версии на компоненты
-$versionComponents = $currentVersion -split '\.'
-$major = [int]$versionComponents[0]
-$minor = [int]$versionComponents[1]
-$patch = [int]$versionComponents[2]
-
-# Инкремент компонента версии
-$patch += 1
-
 # Создание новой версии
-$newVersion = "$major.$minor.$patch"
+$newVersion = "$newVersion_py"
 
 # Запись новой версии обратно в файл
 $newVersion | Set-Content -Path $versionFilePath

@@ -34,6 +34,12 @@ def top_20_query():
 
 
 def pg_stat_user_tables_query():
+    """
+    Запрос для получения количества удалённых, обновлённых и изменённых записей в таблицах.
+
+    :return: None
+    """
+
     query_template = """SELECT relname, 			-- имя таблицы.
                                seq_scan,			-- количество последовательных сканирований (sequential scans) таблицы
                                seq_tup_read ,		-- количество строк, прочитанных при последовательных сканированиях
@@ -51,6 +57,13 @@ def pg_stat_user_tables_query():
 
 
 def get_search_query(dbname_str, like_str):
+    """
+    Запрос для поиска по базе данных.
+    :param dbname_str: Имя базы данных
+    :param like_str: Строка для поиска
+    :return: SQL-запрос
+    """
+
     if like_str.startswith('pa_'):
         like_str = like_str[3:]
         search_condition = f"pa.query LIKE '%{like_str}%'"
@@ -83,11 +96,15 @@ def get_search_query(dbname_str, like_str):
                 JOIN pg_stat_activity pa ON db.oid = pa.datid AND auth.oid = pa.usesysid
                 WHERE db.datname = '{dbname_str}' AND ({search_condition})
                 ORDER BY pa.query_start DESC;"""
-    print(query)
     return query
 
 
 def get_execute_query(dbname_str):
+    """
+    Запрос к базе данных.
+    :param dbname_str: Имя базы данных
+    :return: SQL-запрос
+    """
     query = f"""SELECT DISTINCT
                     pg.query AS pg_query_text, 							-- Текст выполненного SQL-запроса.
                     pa.query AS pa_query_text, 							-- Текст выполненного SQL-запроса.
@@ -113,6 +130,12 @@ def get_execute_query(dbname_str):
 
 
 def get_20_top_query(dbname_str):
+    """
+    Запрос для получения топ-20 самых тяжелых запросов.
+    :param dbname_str: Имя базы данных
+    :return: SQL-запрос
+    """
+
     query = f"""SELECT query                                                         AS query,
                        round(pg.total_exec_time::numeric, 2)                         AS total_time,
                        calls,

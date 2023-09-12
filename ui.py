@@ -11,7 +11,7 @@ from database import DatabaseManager
 from settings import ConnectionSettings
 from sql_highlighter import SQLHighlighter
 from update_version import Updater
-from utility_function import handle_errors, write_log
+from utility_function import handle_errors, Log
 
 updater = Updater()
 version_app = updater.get_remote_version()
@@ -22,6 +22,8 @@ class QueryApp(QMainWindow, UiTheme):
 
     def __init__(self):
         super().__init__()
+        self.btn_check_updates = None
+        self.btn_update = None
         self.btn_execute_top_20_query = None
         self.use_custom_query = None
         self.btn_reconnect_to_db = None
@@ -70,13 +72,29 @@ class QueryApp(QMainWindow, UiTheme):
         self.connect_to_db()
 
     def delayed_check_for_updates(self):
+        """
+        Выполняет отложенную проверку наличия обновлений приложения.
+        :return: None
+        """
         self.check_for_updates()
 
     def showEvent(self, event):
+        """
+        Обрабатывает событие отображения главного окна.
+
+        :param event: Событие отображения окна.
+        :type event: QShowEvent
+        :return: None
+        """
         super().showEvent(event)
         QTimer.singleShot(500, self.delayed_check_for_updates)
 
     def init_ui(self):
+        """
+        Инициализирует элементы пользовательского интерфейса.
+
+        :return: None
+        """
         layout = QVBoxLayout()
         UiTheme.set_dark_theme(self)
 
@@ -108,13 +126,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.table_widget_results = QTableWidget(self)
         self.table_widget_results.setColumnCount(14)
 
-        self.table_widget_results.setHorizontalHeaderLabels(
-            ["pg_stat_statements_query_text",
-             "pg_stat_activity_query_text", "affected_rows", "query_calls", "query_start_time",
-             "backend_start_time",
-             "total_execution_time", "shared_blocks_read", "shared_blocks_written", "local_blocks_read",
-             "local_blocks_written", "user_id", "username", "database_name"]
-        )
+        self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_default())
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
 
@@ -196,7 +208,7 @@ class QueryApp(QMainWindow, UiTheme):
         settings_layout.addWidget(self.btn_disconnect)
         settings_layout.addWidget(self.btn_save_settings)
 
-        self.btn_check_updates = QPushButton(self)
+        self.btn_check_updates = QPushButton(self, "", self.layout)
         self.btn_check_updates.clicked.connect(self.check_for_updates)
         self.btn_check_updates.setVisible(True)
         self.btn_check_updates.setObjectName("btn_check_updates")
@@ -204,7 +216,7 @@ class QueryApp(QMainWindow, UiTheme):
         UiTheme.set_icon_and_tooltip(self.btn_check_updates, "icons/update_check.ico",
                                      f"Проверьте наличие обновлений")
 
-        self.btn_update = QPushButton("Скачать", self)
+        self.btn_update = QPushButton(self, "Скачать", self.layout)
         self.btn_update.clicked.connect(self.loading_file)
         self.btn_update.setVisible(False)  # Hide the button initially
         self.btn_update.setObjectName("btn_update")
@@ -280,17 +292,22 @@ class QueryApp(QMainWindow, UiTheme):
         self.highlighter = highlighter
 
     def setting_input_fields(self):
-        # Поля для настроек подключения
-        self.line_edit_host = QLineEdit(self)
+        """
+            Создает поля ввода для настроек подключения к базе данных.
+
+            :return: None
+        """
+
+        self.line_edit_host = QLineEdit(self, self.layout)
         self.line_edit_host.setPlaceholderText("Хост")
         self.line_edit_host.setText(self.default_host)
-        self.line_edit_port = QLineEdit(self)
+        self.line_edit_port = QLineEdit(self, self.layout)
         self.line_edit_port.setPlaceholderText("Порт")
         self.line_edit_port.setText(self.default_port)
-        self.line_edit_username = QLineEdit(self)
+        self.line_edit_username = QLineEdit(self, self.layout)
         self.line_edit_username.setPlaceholderText("Пользователь")
         self.line_edit_username.setText(self.default_username)
-        self.line_edit_password = QLineEdit(self)
+        self.line_edit_password = QLineEdit(self, self.layout)
         self.line_edit_password.setPlaceholderText("Пароль")
         self.line_edit_password.setEchoMode(QLineEdit.Password)
         self.line_edit_password.setText(self.default_password)
@@ -302,38 +319,63 @@ class QueryApp(QMainWindow, UiTheme):
         self.combo_dbname.currentIndexChanged.connect(self.on_database_changed)
 
     def q_system_tray_icon_build(self):
+        """
+        Создает и настраивает системный трей и его иконку.
+
+        :return: None
+        """
+
         icon_path = "icons/icon.ico"
         self.setWindowIcon(QIcon(icon_path))
         # Создание системного трея
-        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon = QSystemTrayIcon(self, self.layout)
         self.tray_icon.setIcon(QIcon(icon_path))
-        # Создание контекстного меню для трея
-        self.tray_menu = QMenu(self)
-        self.show_action = QAction("Показать окно", self)
-        self.exit_action = QAction("Выход", self)
-        self.tray_menu.addAction(self.show_action)
-        self.tray_menu.addAction(self.exit_action)
         # Установка контекстного меню для трея
         self.tray_icon.setContextMenu(self.tray_menu)
-        # Показать/скрыть главное окно приложения при нажатии на иконку в трее
-        self.show_action.triggered.connect(self.show)
         self.tray_icon.activated.connect(self.tray_icon_clicked)
         # Отображение иконки в трее
         self.tray_icon.show()
 
     def execute_query_shortcut(self):
+        """
+        Выполняет запрос при нажатии сочетания клавиш (сокращение).
+
+        :return: None
+        """
+
         if self.btn_execute_query.isEnabled():
             self.execute_query()
 
     def reset_stats_shortcut(self):
+        """
+            Сбрасывает статистику при нажатии сочетания клавиш (сокращение).
+
+            :return: None
+        """
+
         if self.btn_reset_stats.isEnabled():
             self.reset_stats()
 
     def save_settings_shortcut(self):
+        """
+        Сохраняет настройки подключения при нажатии сочетания клавиш (сокращение).
+
+        :return: None
+        """
+
         if self.btn_save_settings.isEnabled():
             self.save_connection_settings()
 
     def keyPressEvent(self, event):
+        """
+            Обрабатывает события нажатия клавиш, включая горячие клавиши для выполнения запросов,
+            сброса статистики и сохранения настроек.
+
+            :param event: Событие нажатия клавиши.
+            :type event: QKeyEvent
+            :return: None
+        """
+
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
             self.line_edit_search.setFocus()
         elif event.modifiers() == Qt.ShiftModifier and event.key() == Qt.Key_Return:
@@ -361,6 +403,12 @@ class QueryApp(QMainWindow, UiTheme):
         super().keyPressEvent(event)
 
     def reset_stats(self):
+        """
+        Сбрасывает статистику в базе данных.
+
+        :return: None
+        """
+
         if not self.db_connection:
             self.statusBar().showMessage("Не установлено соединение с БД.")
             return
@@ -376,6 +424,12 @@ class QueryApp(QMainWindow, UiTheme):
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
 
     def pg_stat_reset(self):
+        """
+        Сбрасывает статистику PostgreSQL.
+
+        :return: None
+        """
+
         if not self.db_connection:
             self.statusBar().showMessage("Не установлено соединение с БД.")
             return
@@ -391,6 +445,12 @@ class QueryApp(QMainWindow, UiTheme):
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
 
     def connect_to_db(self):
+        """
+        Устанавливает соединение с базой данных на основе введенных пользователем параметров.
+
+        :return: None
+        """
+
         dbname = self.combo_dbname.currentText()
         host = self.line_edit_host.text()
         port = self.line_edit_port.text()
@@ -405,6 +465,12 @@ class QueryApp(QMainWindow, UiTheme):
                 self.statusBar().showMessage("Ошибка подключения")
 
     def disconnect_from_db(self):
+        """
+        Отключается от базы данных.
+
+        :return: None
+        """
+
         if self.db_connection:
             self.db_connection.disconnect()
             self.db_connection = None
@@ -412,116 +478,118 @@ class QueryApp(QMainWindow, UiTheme):
             self.btn_disconnect.setEnabled(False)
 
     def execute_query(self):
-        if not self.is_not_setting:
-            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
-            return
+        """
+        Выполняет запрос к базе данных.
 
-        column = Constants.table_columns_default()
-        self.table_widget_results.setHorizontalHeaderLabels(column)
-
-        if not self.db_connection:
-            self.statusBar().showMessage("Не установлено соединение с БД.")
-            return
+        :return: None
+        """
 
         query = Constants.get_execute_query(self.combo_dbname.currentText())
-
-        try:
-            with self.db_connection:
-                results = self.db_connection.run_execute_query(query)
-                self.display_results(results)
-                self.statusBar().showMessage("Запрос выполнен успешно.")
-        except Exception as e:
-            self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
-            self.show_error_message("Ошибка выполнения запроса", e)
-            write_log(f"Ошибка выполнения запроса: {e}")
+        columns = Constants.table_columns_default()
+        results = self.execute_query_base(query, columns)
+        if results is not None:
+            self.display_results(results)
 
     def search_query(self):
-        if not self.is_not_setting:
-            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
-            return
+        """
+        Выполняет поисковый запрос к базе данных.
 
-        column = Constants.table_columns_default()
-        self.table_widget_results.setHorizontalHeaderLabels(column)
+        :return: None
+        """
 
-        if not self.db_connection:
-            self.statusBar().showMessage("Не установлено соединение с БД.")
-            return
-
-        try:
-            querySearch = Constants.get_search_query(self.combo_dbname.currentText(), self.line_edit_search.text())
-
-            with self.db_connection:
-                results = self.db_connection.run_execute_query(querySearch)
-                self.display_results(results)
-                self.statusBar().showMessage("Запрос выполнен успешно.")
-        except Exception as e:
-            self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
-            self.show_error_message(self, "Ошибка выполнения запроса", e)
-            write_log(f"Ошибка выполнения запроса: {e}")
+        querySearch = Constants.get_search_query(self.combo_dbname.currentText(), self.line_edit_search.text())
+        columns = Constants.table_columns_default()  # Используйте соответствующий список колонок
+        results = self.execute_query_base(querySearch, columns)
+        if results is not None:
+            self.display_results(results)
 
     def execute_custom_query(self):
-        if not self.is_not_setting:
-            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
-            return
+        """
+        Запрос для получения количества удалённых, обновлённых и изменённых записей в таблицах.
+
+        :return: None
+        """
 
         self.reconnect_to_db()
-        if not self.db_connection:
-            self.statusBar().showMessage("Не установлено соединение с БД.")
-            return
-
         table_names = self.get_table_names()
         at_least_one_non_empty = any(name and name.strip() for name in table_names)
-
         if not at_least_one_non_empty:
             self.show_error_message(self, "Ошибка", "Все имена таблиц пусты")
             return
 
-        self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_ins_upt_del())
-
         query_template = Constants.pg_stat_user_tables_query()
         query = query_template.format(", ".join(["'{}'".format(name) for name in table_names]))
-
-        try:
-            with self.db_connection:
-                results = self.db_connection.run_execute_query(query)
-                self.display_results(results, False, 3)
-                self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
-        except Exception as e:
-            self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
-            self.show_error_message(self, "Ошибка выполнения пользовательского запроса", e)
-            write_log(f"Ошибка выполнения пользовательского запроса: {e}")
+        columns = Constants.table_columns_ins_upt_del()  # Используйте соответствующий список колонок
+        results = self.execute_query_base(query, columns)
+        if results is not None:
+            self.display_results(results, False, 3)
 
     def execute_top_20_query(self):
+        """
+         Запрос для получения топ-20 самых тяжелых запросов.
+
+         :return: None
+         """
+
+        query = Constants.get_20_top_query(self.combo_dbname.currentText())
+        columns = Constants.top_20_query()  # Используйте соответствующий список колонок
+        results = self.execute_query_base(query, columns)
+        if results is not None:
+            self.display_results(results, False, 3)
+
+    def execute_query_base(self, query, columns):
+        """
+        Выполняет запрос к базе данных и возвращает результаты.
+
+        :param query: SQL-запрос к базе данных.
+        :type query: str
+        :param columns: Список столбцов для отображения результатов.
+        :type columns: list
+        :return: Результаты выполнения запроса.
+        :rtype: list
+        """
+
         if not self.is_not_setting:
             self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
-            return
+            return None
 
-        column = Constants.top_20_query()
-        self.table_widget_results.setHorizontalHeaderLabels(column)
+        self.table_widget_results.setHorizontalHeaderLabels(columns)
 
         if not self.db_connection:
             self.statusBar().showMessage("Не установлено соединение с БД.")
-            return
-
-        query = Constants.get_20_top_query(self.combo_dbname.currentText())
+            return None
 
         try:
             with self.db_connection:
                 results = self.db_connection.run_execute_query(query)
-                self.display_results(results, False, 3)
                 self.statusBar().showMessage("Запрос выполнен успешно.")
+                return results
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
-            self.show_error_message("Ошибка выполнения запроса", e)
-            write_log(f"Ошибка выполнения запроса: {e}")
+            self.show_error_message(self, "Ошибка выполнения запроса", e)
+            Log.info(f"Ошибка выполнения запроса: {e}")
+            return None
 
     def execute_selected_query(self):
+        """
+        Выполняет выбранный запрос.
+
+        :return: None
+        """
+
         if self.use_custom_query:
             self.execute_custom_query()
         else:
             self.execute_query()
 
     def get_table_names(self):
+        """
+        Извлекает имена таблиц из ввода пользователя.
+
+        :return: Список имен таблиц.
+        :rtype: list
+        """
+
         input_text = self.text_edit_full_query.toPlainText()
         input_text = input_text.replace("'", "")
         table_names = input_text.split(',')
@@ -530,6 +598,15 @@ class QueryApp(QMainWindow, UiTheme):
 
     @staticmethod
     def removing_line_breaks(results):
+        """
+        Изменяет форматирование результатов запроса.
+
+        :param results: Результаты запроса.
+        :type results: list
+        :return: Результаты с измененным форматированием.
+        :rtype: list
+        """
+
         def replace_line_breaks(text):
             # Заменяем переносы строк и табуляции на пробелы
             return sub(r"[\n\t]+", " ", text)
@@ -541,6 +618,18 @@ class QueryApp(QMainWindow, UiTheme):
         return results
 
     def display_results(self, results, is_set_length_columns=True, length_two_columns=3):
+        """
+            Отображает результаты запроса в виде таблицы.
+
+            :param results: Результаты запроса.
+            :type results: list
+            :param is_set_length_columns: Устанавливать ли ширину столбцов автоматически.
+            :type is_set_length_columns: bool
+            :param length_two_columns: Ширина первых двух столбцов.
+            :type length_two_columns: int
+            :return: None
+        """
+
         self.table_widget_results.clearContents()
         self.table_widget_results.setRowCount(len(results))
         for row_idx, row in enumerate(results):
@@ -559,10 +648,29 @@ class QueryApp(QMainWindow, UiTheme):
             self.table_widget_results.resizeColumnToContents(col_idx)
 
     def resizeEvent(self, event):
-        # Изменение размера таблицы при изменении размера окна
+        """
+        Обрабатывает событие изменения размера окна.
+
+        :param event: Событие изменения размера окна.
+        :type event: QResizeEvent
+        :return: None
+        """
+
         self.table_widget_results.horizontalHeader().setStretchLastSection(True)
 
     def view_full_query(self, row, column, is_modal=False):
+        """
+        Отображает полный текст запроса.
+
+        :param row: Индекс строки в таблице результатов.
+        :type row: int
+        :param column: Индекс столбца в таблице результатов.
+        :type column: int
+        :param is_modal: Отображать ли в модальном режиме.
+        :type is_modal: bool
+        :return: None
+        """
+
         try:
             if column == 0 or column == 1:
                 query = self.table_widget_results.item(row, column).text()
@@ -574,9 +682,15 @@ class QueryApp(QMainWindow, UiTheme):
 
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения поиска: {e}")
-            write_log(f"{e}")
+            Log.info(f"{e}")
 
     def load_default_connection_settings(self):
+        """
+        Загружает настройки подключения по умолчанию.
+
+        :return: None
+        """
+
         settings = ConnectionSettings.load_all_settings()
 
         if len(settings) == 0:
@@ -599,11 +713,23 @@ class QueryApp(QMainWindow, UiTheme):
             self.default_password = actual_settings[0]["password"]
 
     def load_connection_settings(self):
+        """
+        Загружает настройки подключения из сохраненных данных.
+
+        :return: None
+        """
+
         databases = ConnectionSettings.load()
         self.combo_dbname.addItems(databases)
         self.combo_dbname.setCurrentText(self.default_dbname)
 
     def save_connection_settings(self):
+        """
+        Сохраняет текущие настройки подключения.
+
+        :return: None
+        """
+
         new_settings = {
             "setting": [
                 {
@@ -622,9 +748,17 @@ class QueryApp(QMainWindow, UiTheme):
             self.reconnect_to_db()
         else:
             self.statusBar().showMessage("Ошибка при сохранении настроек.")
-            write_log("ERROR", "ui.log", f"Ошибка при сохранении настроек")
+            Log.info(f"Ошибка при сохранении настроек")
 
     def on_database_changed(self, index):
+        """
+        Обновляет настройки подключения при изменении выбранной базы данных.
+
+        :param index: Индекс выбранной базы данных.
+        :type index: int
+        :return: None
+        """
+
         selected_db = self.combo_dbname.currentText()
         settings = ConnectionSettings.load_all_settings()
 
@@ -639,18 +773,46 @@ class QueryApp(QMainWindow, UiTheme):
         self.connect_to_db()
 
     def clear_table_results(self):
+        """
+        Очищает таблицу с результатами запросов.
+
+        :return: None
+        """
+
         self.table_widget_results.clearContents()
         self.table_widget_results.setRowCount(0)
 
     def tray_icon_clicked(self, reason):
+        """
+        Обрабатывает события клика по иконке в системном трее.
+
+        :param reason: Причина события клика.
+        :type reason: QSystemTrayIcon.ActivationReason
+        :return: None
+        """
+
         if reason == QSystemTrayIcon.DoubleClick:
             self.show()
 
     def closeEvent(self, event):
+        """
+        Обрабатывает событие закрытия приложения.
+
+        :param event: Событие закрытия приложения.
+        :type event: QCloseEvent
+        :return: None
+        """
+
         QApplication.quit()
         event.accept()
 
     def reconnect_to_db(self):
+        """
+        Переподключается к базе данных с текущими настройками.
+
+        :return: None
+        """
+
         if self.db_connection:
             self.db_connection.disconnect()
             self.db_connection = None
@@ -671,6 +833,16 @@ class QueryApp(QMainWindow, UiTheme):
 
     @staticmethod
     def show_error_message(self, title, message):
+        """
+        Отображает окно с сообщением об ошибке.
+
+        :param title: Заголовок окна.
+        :type title: str
+        :param message: Текст сообщения об ошибке.
+        :type message: str
+        :return: None
+        """
+
         error_box = QMessageBox(self)
         error_box.setIcon(QMessageBox.Critical)
         error_box.setWindowTitle(title)
@@ -678,6 +850,12 @@ class QueryApp(QMainWindow, UiTheme):
         error_box.exec_()
 
     def check_for_updates(self):
+        """
+        Проверяет наличие обновлений приложения.
+
+        :return: None
+        """
+
         update_available, local_version = updater.check_update()
 
         if update_available:
@@ -685,14 +863,32 @@ class QueryApp(QMainWindow, UiTheme):
             self.btn_check_updates.setVisible(False)
 
     def update_application(self):
+        """
+        Инициирует процесс обновления приложения.
+
+        :return: None
+        """
+
         threading.Thread(target=self.run_update_async).start()
         self.close()
 
     def loading_file(self):
+        """
+        Открывает ссылку для загрузки файла.
+
+        :return: None
+        """
+
         QDesktopServices.openUrl(QUrl(updater.get_download_link()))
         QTimer.singleShot(200, lambda: self.btn_update.setVisible(False))
 
     def update_application_auto(self):
+        """
+        Автоматически предлагает обновление приложения.
+
+        :return: None
+        """
+
         QMessageBox.information(self, "Обновление", f"Доступна новая версия: {version_app}")
         reply = QMessageBox.question(self, 'Обновить?', 'Для обновления требуется закрыть приложение.<br>'
                                                         'После обновление приложение будет запущенно заново.<br><br>'
@@ -708,4 +904,10 @@ class QueryApp(QMainWindow, UiTheme):
 
     @staticmethod
     def run_update_async():
+        """
+        Запуск обновления в асинхронном режиме
+
+        :return: None
+        """
+
         updater.run_update()

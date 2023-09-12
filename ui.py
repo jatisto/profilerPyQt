@@ -605,31 +605,24 @@ class QueryApp(QMainWindow, UiTheme):
 
     def save_connection_settings(self):
         new_settings = {
-            "dbname": self.combo_dbname.currentText(),
-            "host": self.line_edit_host.text(),
-            "port": self.line_edit_port.text(),
-            "username": self.line_edit_username.text(),
-            "password": self.line_edit_password.text(),
-            "actual": True
+            "setting": [
+                {
+                    "dbname": self.combo_dbname.currentText(),
+                    "host": self.line_edit_host.text(),
+                    "port": self.line_edit_port.text(),
+                    "username": self.line_edit_username.text(),
+                    "password": self.line_edit_password.text(),
+                    "actual": True
+                }
+            ]
         }
 
-        settings = ConnectionSettings.load()  # Загрузка существующих настроек
-
-        # Проверка на существующие настройки с такими же данными
-        existing_setting = next((setting for setting in settings if setting["dbname"] == new_settings["dbname"] and
-                                 setting["host"] == new_settings["host"] and setting["port"] == new_settings["port"] and
-                                 setting["username"] == new_settings["username"] and setting["password"] ==
-                                 new_settings["password"]), None)
-
-        if existing_setting:
-            existing_setting["actual"] = True  # Установка "actual" в "True" для существующей настройки
+        if ConnectionSettings.save(new_settings):
             self.statusBar().showMessage("Настройки успешно сохранены.")
             self.reconnect_to_db()
         else:
-            settings.append(new_settings)  # Создание новой настройки
-            ConnectionSettings.save(settings)
-            self.statusBar().showMessage("Настройки успешно сохранены.")
-            self.reconnect_to_db()
+            self.statusBar().showMessage("Ошибка при сохранении настроек.")
+            write_log("ERROR", "ui.log", f"Ошибка при сохранении настроек")
 
     def on_database_changed(self, index):
         selected_db = self.combo_dbname.currentText()

@@ -211,6 +211,7 @@ QPushButton#btn_disconnect:disabled {
 
 /* Стили для кнопок */
 QPushButton#btn_execute_query,
+QPushButton#btn_execute_top_20_query,
 QPushButton#btn_execute_query_opr,
 QPushButton#btn_reconnect_to_db,
 QPushButton#btn_pg_stat_reset,
@@ -243,6 +244,29 @@ QPushButton#btn_execute_query:pressed {
 }
 
 QPushButton#btn_execute_query:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Кнопка выполнения запроса */
+QPushButton#btn_execute_top_20_query {
+    background-color: #d94545;
+    color: black;
+}
+
+QPushButton#btn_execute_top_20_query:hover {
+    background-color: #d25d5d;
+}
+
+QPushButton#btn_execute_top_20_query:focus {
+    border: 2px solid #d73f3f;
+}
+
+QPushButton#btn_execute_top_20_query:pressed {
+    background-color: #444444;
+}
+
+QPushButton#btn_execute_top_20_query:disabled {
     background-color: #b0b0b0;
     cursor: not-allowed;
 }

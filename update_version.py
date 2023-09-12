@@ -10,6 +10,7 @@ import requests
 from settings import ConnectionSettings
 from utility_function import handle_errors
 
+nameApp = "PgSSR"
 
 class Updater:
     def __init__(self):
@@ -92,7 +93,7 @@ class Updater:
             latest_release = releases[0]
             latest_version = latest_release["tag_name"]
             base_url = f"https://github.com/{self.username}/{self.repo}/releases/download"
-            file_name = "PgSSR.exe"
+            file_name = f"{nameApp}.exe"
             url_to_download = f"{base_url}/{latest_version}/{file_name}"
             return url_to_download
         else:

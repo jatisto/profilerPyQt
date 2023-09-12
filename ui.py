@@ -22,6 +22,7 @@ class QueryApp(QMainWindow, UiTheme):
 
     def __init__(self):
         super().__init__()
+        self.btn_execute_top_20_query = None
         self.use_custom_query = None
         self.btn_reconnect_to_db = None
         self.btn_pg_stat_reset = None
@@ -86,7 +87,10 @@ class QueryApp(QMainWindow, UiTheme):
         self.line_edit_search = QLineEdit(self)
         self.line_edit_search.setPlaceholderText("Найти")
         self.line_edit_search.setFixedWidth(300)
-        self.line_edit_search.setToolTip("[Ctrl+F]")
+        self.line_edit_search.setToolTip(
+            "[Ctrl+F] - По умолчанию поиск происходит по колонке [pg_stat_statements_query]\n"
+            "Если в начало строки ввести [pa_]<Строка которую нужно найти> - поиск произойдет по строке [pg_stat_activity_query]\n"
+            "Если в начало строки ввести [all_]<Строка которую нужно найти> - поиск произойдет по строке обоим колонкам [pg_stat_statements_query_text, pg_stat_activity_query_text]")
 
         # Добавьте рамку, чтобы улучшить внешний вид поля поиска.
         search_frame = QFrame(self)
@@ -102,10 +106,14 @@ class QueryApp(QMainWindow, UiTheme):
 
         # Виджет таблицы для отображения данных
         self.table_widget_results = QTableWidget(self)
-        self.table_widget_results.setColumnCount(5)
+        self.table_widget_results.setColumnCount(14)
 
         self.table_widget_results.setHorizontalHeaderLabels(
-            ["Запрос", "Строки", "Вызовы", "Начало запроса", "Время запуска"]
+            ["pg_stat_statements_query_text",
+             "pg_stat_activity_query_text", "affected_rows", "query_calls", "query_start_time",
+             "backend_start_time",
+             "total_execution_time", "shared_blocks_read", "shared_blocks_written", "local_blocks_read",
+             "local_blocks_written", "user_id", "username", "database_name"]
         )
         self.table_widget_results.setSortingEnabled(True)
         self.table_widget_results.cellClicked.connect(self.view_full_query)
@@ -129,6 +137,15 @@ class QueryApp(QMainWindow, UiTheme):
 
         UiTheme.set_icon_and_tooltip(self.btn_execute_query, "icons/rocket_32.ico",
                                      f"[Ctrl+Enter] - Выполнить")
+
+        self.btn_execute_top_20_query = QPushButton("TOP 20", self)
+        self.btn_execute_top_20_query.clicked.connect(self.execute_top_20_query)
+        self.btn_execute_top_20_query.setObjectName("btn_execute_top_20_query")
+
+        UiTheme.set_icon_and_tooltip(self.btn_execute_top_20_query, "icons/rocket_32.ico",
+                                     f"[Ctrl+Shift+Alt+Enter] - Запрос показывает 20 запросов, занимающих много времени:\n"
+                                     f"\n-- Последний столбец особенно примечателен: он показывает процент общего времени, потраченного на один запрос."
+                                     f"\n-- Это поможет вам выяснить, насколько влияет запрос на общую производительность или не влияет.")
 
         self.btn_pg_stat_reset = QPushButton(self)
         self.btn_pg_stat_reset.clicked.connect(self.pg_stat_reset)
@@ -226,6 +243,9 @@ class QueryApp(QMainWindow, UiTheme):
         btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_pg_stat_reset)
         btn_layout.addWidget(self.btn_execute_query_opr)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(separator)
+        btn_layout.addWidget(self.btn_execute_top_20_query)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(separator)
         btn_layout.addWidget(self.btn_execute_query)
@@ -333,6 +353,9 @@ class QueryApp(QMainWindow, UiTheme):
             self.combo_dbname.setFocus()
         elif event.modifiers() == (Qt.ControlModifier | Qt.ShiftModifier) and event.key() == Qt.Key_Return:
             self.execute_custom_query()
+        elif event.modifiers() == (
+                Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier) and event.key() == Qt.Key_Return:
+            self.execute_top_20_query()
         elif event.key() == Qt.Key_Escape:
             self.combo_dbname.clearFocus()
         super().keyPressEvent(event)
@@ -461,12 +484,36 @@ class QueryApp(QMainWindow, UiTheme):
         try:
             with self.db_connection:
                 results = self.db_connection.run_execute_query(query)
-                self.display_results(results)
+                self.display_results(results, False, 3)
                 self.statusBar().showMessage("Пользовательский запрос выполнен успешно.")
         except Exception as e:
             self.statusBar().showMessage(f"Ошибка выполнения пользовательского запроса: {e}")
             self.show_error_message(self, "Ошибка выполнения пользовательского запроса", e)
             write_log(f"Ошибка выполнения пользовательского запроса: {e}")
+
+    def execute_top_20_query(self):
+        if not self.is_not_setting:
+            self.show_error_message(self, "Ошибка", "Данные для подключения отсутствует.")
+            return
+
+        column = Constants.top_20_query()
+        self.table_widget_results.setHorizontalHeaderLabels(column)
+
+        if not self.db_connection:
+            self.statusBar().showMessage("Не установлено соединение с БД.")
+            return
+
+        query = Constants.get_20_top_query(self.combo_dbname.currentText())
+
+        try:
+            with self.db_connection:
+                results = self.db_connection.run_execute_query(query)
+                self.display_results(results, False, 3)
+                self.statusBar().showMessage("Запрос выполнен успешно.")
+        except Exception as e:
+            self.statusBar().showMessage(f"Ошибка выполнения запроса: {e}")
+            self.show_error_message("Ошибка выполнения запроса", e)
+            write_log(f"Ошибка выполнения запроса: {e}")
 
     def execute_selected_query(self):
         if self.use_custom_query:
@@ -493,19 +540,23 @@ class QueryApp(QMainWindow, UiTheme):
         results = [tuple(row) for row in results]
         return results
 
-    def display_results(self, results):
-        # Отобразить результаты в таблице
+    def display_results(self, results, is_set_length_columns=True, length_two_columns=3):
         self.table_widget_results.clearContents()
         self.table_widget_results.setRowCount(len(results))
-
         for row_idx, row in enumerate(results):
             for col_idx, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 self.table_widget_results.setItem(row_idx, col_idx, item)
 
-        # Установите ширину столбца «pg.query», чтобы он занимал 1/3 ширины таблицы.
-        table_width = self.table_widget_results.viewport().size().width()
-        self.table_widget_results.setColumnWidth(0, table_width // 2)
+        if is_set_length_columns:
+            # Установите ширину первых двух столбцов на 1/3 ширины таблицы.
+            table_width = self.table_widget_results.viewport().size().width()
+            self.table_widget_results.setColumnWidth(0, table_width // 2)
+            self.table_widget_results.setColumnWidth(1, table_width // length_two_columns)
+
+        # Установите ширину остальных столбцов на основе наименований.
+        for col_idx in range(2, self.table_widget_results.columnCount()):
+            self.table_widget_results.resizeColumnToContents(col_idx)
 
     def resizeEvent(self, event):
         # Изменение размера таблицы при изменении размера окна
@@ -513,7 +564,7 @@ class QueryApp(QMainWindow, UiTheme):
 
     def view_full_query(self, row, column, is_modal=False):
         try:
-            if column == 0:
+            if column == 0 or column == 1:
                 query = self.table_widget_results.item(row, column).text()
 
                 # Установите текст в виджете QTextEdit
@@ -554,27 +605,43 @@ class QueryApp(QMainWindow, UiTheme):
 
     def save_connection_settings(self):
         new_settings = {
-            "setting": [
-                {
-                    "dbname": self.combo_dbname.currentText(),
-                    "host": self.line_edit_host.text(),
-                    "port": self.line_edit_port.text(),
-                    "username": self.line_edit_username.text(),
-                    "password": self.line_edit_password.text(),
-                    "actual": True
-                }
-            ]
+            "dbname": self.combo_dbname.currentText(),
+            "host": self.line_edit_host.text(),
+            "port": self.line_edit_port.text(),
+            "username": self.line_edit_username.text(),
+            "password": self.line_edit_password.text(),
+            "actual": True
         }
 
-        if ConnectionSettings.save(new_settings):
+        settings = ConnectionSettings.load()  # Загрузка существующих настроек
+
+        # Проверка на существующие настройки с такими же данными
+        existing_setting = next((setting for setting in settings if setting["dbname"] == new_settings["dbname"] and
+                                 setting["host"] == new_settings["host"] and setting["port"] == new_settings["port"] and
+                                 setting["username"] == new_settings["username"] and setting["password"] ==
+                                 new_settings["password"]), None)
+
+        if existing_setting:
+            existing_setting["actual"] = True  # Установка "actual" в "True" для существующей настройки
             self.statusBar().showMessage("Настройки успешно сохранены.")
             self.reconnect_to_db()
         else:
-            self.statusBar().showMessage("Ошибка при сохранении настроек.")
-            write_log(f"Ошибка при сохранении настроек")
+            settings.append(new_settings)  # Создание новой настройки
+            ConnectionSettings.save(settings)
+            self.statusBar().showMessage("Настройки успешно сохранены.")
+            self.reconnect_to_db()
 
     def on_database_changed(self, index):
         selected_db = self.combo_dbname.currentText()
+        settings = ConnectionSettings.load_all_settings()
+
+        actual_settings = [setting for setting in settings if setting["dbname"] == selected_db]
+
+        self.line_edit_host.setText(actual_settings[0]["host"])
+        self.line_edit_port.setText(actual_settings[0]["port"])
+        self.line_edit_username.setText(actual_settings[0]["username"])
+        self.line_edit_password.setText(actual_settings[0]["password"])
+
         self.clear_table_results()
         self.connect_to_db()
 

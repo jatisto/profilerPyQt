@@ -1,15 +1,33 @@
 class Constants:
-    table_columns_default = ["pg_stat_statements_query  (запросов из статистики)",
-                             "pg_stat_activity_query (запросов из активности сеанса)", "affected_rows", "query_calls",
-                             "query_start_time",
-                             "backend_start_time",
-                             "total_execution_time", "shared_blocks_read", "shared_blocks_written", "local_blocks_read",
-                             "local_blocks_written", "user_id", "username", "database_name"]
-    table_columns_ins_upt_del = ["relname", "seq_scan", "seq_tup_read", "idx_scan", "idx_tup_fetch", "n_tup_ins",
-                                 "n_tup_upd", "n_tup_del", "n_live_tup", "n_dead_tup", "", "", "", "", ""]
+    table_columns_default = [
+        "запрос",
+        "затронутые строки",
+        "запрос звонков",
+        "общее время выполнения",
+        "общие блоки прочитаны",
+        "написаны общие блоки",
+        "чтение локальных блоков",
+        "локальные блоки написаны",
+        "время начала запроса",
+        "время начала серверной части"
+    ]
+    table_columns_ins_upt_del = [
+        "имя таблицы",
+        "кол. вставленных строк",
+        "кол. обновленных строк",
+        "кол. удаленных строк",
+        "кол. последовательных сканирований (seq_scan)",
+        "кол. сканирований индекса (inx_scan)",
+        "кол. мертвых (неактивных) строк",
+        "", "", ""]
 
-    top_20_query = ["query", "total_time", "calls", "mean", "percentage_cpu", "", "",
-                    "", "", "", "", "", "", "", "", ""]
+    top_20_query = [
+        "запрос",
+        "общее время выполнения",
+        "кол. вызовов",
+        "среднее время выполнения",
+        "Доля времени выполнения CPU",
+        "", "", "", "", ""]
 
 
 def list_include() -> object:
@@ -40,15 +58,12 @@ def pg_stat_user_tables_query():
     :return: None
     """
 
-    query_template = """SELECT relname, 			-- имя таблицы.
-                               seq_scan,			-- количество последовательных сканирований (sequential scans) таблицы
-                               seq_tup_read ,		-- количество строк, прочитанных при последовательных сканированиях
-                               idx_scan,			-- количество индексных сканирований таблицы
-                               idx_tup_fetch ,		-- количество строк, извлеченных из индексов
+    query_template = """SELECT relname, 			-- имя таблицы.                               
                                n_tup_ins,			-- количество вставленных строк в таблицу
                                n_tup_upd,			-- количество обновленных строк в таблице
                                n_tup_del,			-- количество удаленных строк из таблицы
-                               n_live_tup,			-- текущее количество живых строк в таблице
+                               seq_scan,			-- количество последовательных сканирований (sequential scans) таблицы
+                               idx_scan,			-- количество индексных сканирований таблицы
                                n_dead_tup			-- текущее количество мертвых (удаленных) строк в таблице
                           FROM pg_stat_user_tables
                          WHERE relname IN ({})
@@ -76,20 +91,16 @@ def get_search_query(dbname_str, like_str):
 
     # Создаем запрос, включая строку поиска
     query = f"""SELECT DISTINCT
-                    pg.query AS pg_query_text,
-                    pa.query AS pa_query_text,
-                    pg.rows AS affected_rows,
-                    pg.calls AS query_calls,
-                    pa.query_start AS query_start_time,
-                    pa.backend_start AS backend_start_time,
-                    pg.total_exec_time AS total_execution_time,
-                    pg.shared_blks_read AS shared_blocks_read,
-                    pg.shared_blks_written AS shared_blocks_written,
-                    pg.local_blks_read AS local_blocks_read,
-                    pg.local_blks_written AS local_blocks_written,
-                    pg.userid AS user_id,
-                    auth.rolname AS username,
-                    db.datname AS database_name
+                    pg.query AS pg_query_text, 							-- Текст выполненного SQL-запроса.
+                    pg.rows AS affected_rows,							-- Количество строк, затронутых запросом.
+                    pg.calls AS query_calls, 							-- Количество вызовов данного запроса.                   
+                    pg.total_exec_time AS total_execution_time, 		-- Общее время выполнения запроса.
+                    pg.shared_blks_read AS shared_blocks_read, 			-- Количество считанных разделяемых блоков.
+                    pg.shared_blks_written AS shared_blocks_written, 	-- Количество записанных разделяемых блоков.
+                    pg.local_blks_read AS local_blocks_read, 			-- Количество считанных локальных блоков.
+                    pg.local_blks_written AS local_blocks_written, 		-- Количество записанных локальных блоков.
+                    pa.query_start AS query_start_time, 				-- Время начала выполнения запроса.
+                    pa.backend_start AS backend_start_time 			    -- Время старта бэкенд-процесса, выполнившего запрос.
                 FROM pg_stat_statements pg
                 JOIN pg_database db ON pg.dbid = db.oid
                 JOIN pg_authid auth ON pg.userid = auth.oid
@@ -107,19 +118,15 @@ def get_execute_query(dbname_str):
     """
     query = f"""SELECT DISTINCT
                     pg.query AS pg_query_text, 							-- Текст выполненного SQL-запроса.
-                    pa.query AS pa_query_text, 							-- Текст выполненного SQL-запроса.
                     pg.rows AS affected_rows,							-- Количество строк, затронутых запросом.
-                    pg.calls AS query_calls, 							-- Количество вызовов данного запроса.
-                    pa.query_start AS query_start_time, 				-- Время начала выполнения запроса.
-                    pa.backend_start AS backend_start_time, 			-- Время старта бэкенд-процесса, выполнившего запрос.
+                    pg.calls AS query_calls, 							-- Количество вызовов данного запроса.                   
                     pg.total_exec_time AS total_execution_time, 		-- Общее время выполнения запроса.
                     pg.shared_blks_read AS shared_blocks_read, 			-- Количество считанных разделяемых блоков.
                     pg.shared_blks_written AS shared_blocks_written, 	-- Количество записанных разделяемых блоков.
                     pg.local_blks_read AS local_blocks_read, 			-- Количество считанных локальных блоков.
                     pg.local_blks_written AS local_blocks_written, 		-- Количество записанных локальных блоков.
-                    pg.userid AS user_id, 								-- Идентификатор пользователя, выполнившего запрос.
-                    auth.rolname AS username, 							-- Имя пользователя, выполнившего запрос.
-                    db.datname AS database_name 						-- Имя базы данных, в которой выполняется запрос.
+                    pa.query_start AS query_start_time, 				-- Время начала выполнения запроса.
+                    pa.backend_start AS backend_start_time  			-- Время старта бэкенд-процесса, выполнившего запрос.
                 FROM pg_stat_statements pg
                 JOIN pg_database db ON pg.dbid = db.oid
                 JOIN pg_authid auth ON pg.userid = auth.oid

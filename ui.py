@@ -2,10 +2,11 @@ import threading
 from re import sub
 
 from PySide2.QtCore import (Qt, QTimer, QUrl)
-from PySide2.QtGui import (QIcon, QDesktopServices)
+from PySide2.QtGui import (QIcon, QDesktopServices, QPainter, QColor, QPalette)
 from PySide2.QtWidgets import *
 
 import Constants
+from Bar import Bar
 from UiTheme import UiTheme
 from database import DatabaseManager
 from settings import ConnectionSettings
@@ -53,7 +54,6 @@ class QueryApp(QMainWindow, UiTheme):
         self.tray_menu = None
         self.tray_icon = None
         self.is_not_setting = None
-        self.setWindowTitle(f"Интерфейс для работы с pg_stat_statements v{version_app}")
         self.setGeometry(100, 100, 1200, 800)
 
         self.db_connection = None
@@ -64,12 +64,25 @@ class QueryApp(QMainWindow, UiTheme):
         self.default_port = None
         self.default_username = None
         self.default_password = None
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
+        # Получение палитры окна
+        palette = self.palette()
+
+        # Установка цветов
+        palette.setColor(QPalette.WindowText, palette.color(QPalette.Active, QPalette.WindowText))
+        palette.setColor(QPalette.Window, palette.color(QPalette.Active, QPalette.Window))
 
         self.load_default_connection_settings()
         self.init_ui()
 
         self.load_connection_settings()
         self.connect_to_db()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setBrush(QColor(255, 0, 0))  # Установка желаемого цвета (в данном случае - красный)
+        painter.drawRect(0, 0, self.width(), 30)  # Рисование прямоугольника с заданными координатами и размерами
 
     def delayed_check_for_updates(self):
         """
@@ -97,7 +110,10 @@ class QueryApp(QMainWindow, UiTheme):
         """
         layout = QVBoxLayout()
         UiTheme.set_dark_theme(self)
-
+        version_app_value = version_app.replace("\n", "")
+        title_text = f"Интерфейс для работы с pg_stat_statements v{version_app_value}"
+        bar = Bar(self, title_text)
+        self.setMenuWidget(bar)
         self.q_system_tray_icon_build()
         self.setting_input_fields()
 
@@ -124,7 +140,7 @@ class QueryApp(QMainWindow, UiTheme):
 
         # Виджет таблицы для отображения данных
         self.table_widget_results = QTableWidget(self)
-        self.table_widget_results.setColumnCount(14)
+        self.table_widget_results.setColumnCount(10)
 
         self.table_widget_results.setHorizontalHeaderLabels(Constants.table_columns_default())
         self.table_widget_results.setSortingEnabled(True)
@@ -522,7 +538,7 @@ class QueryApp(QMainWindow, UiTheme):
         columns = Constants.table_columns_ins_upt_del()  # Используйте соответствующий список колонок
         results = self.execute_query_base(query, columns)
         if results is not None:
-            self.display_results(results, False, 3)
+            self.display_results(results, False)
 
     def execute_top_20_query(self):
         """
@@ -535,7 +551,7 @@ class QueryApp(QMainWindow, UiTheme):
         columns = Constants.top_20_query()  # Используйте соответствующий список колонок
         results = self.execute_query_base(query, columns)
         if results is not None:
-            self.display_results(results, False, 3)
+            self.display_results(results, False)
 
     def execute_query_base(self, query, columns):
         """
@@ -617,7 +633,7 @@ class QueryApp(QMainWindow, UiTheme):
         results = [tuple(row) for row in results]
         return results
 
-    def display_results(self, results, is_set_length_columns=True, length_two_columns=3):
+    def display_results(self, results, is_set_length_columns=True):
         """
             Отображает результаты запроса в виде таблицы.
 
@@ -641,10 +657,9 @@ class QueryApp(QMainWindow, UiTheme):
             # Установите ширину первых двух столбцов на 1/3 ширины таблицы.
             table_width = self.table_widget_results.viewport().size().width()
             self.table_widget_results.setColumnWidth(0, table_width // 2)
-            self.table_widget_results.setColumnWidth(1, table_width // length_two_columns)
 
         # Установите ширину остальных столбцов на основе наименований.
-        for col_idx in range(2, self.table_widget_results.columnCount()):
+        for col_idx in range(1, self.table_widget_results.columnCount()):
             self.table_widget_results.resizeColumnToContents(col_idx)
 
     def resizeEvent(self, event):

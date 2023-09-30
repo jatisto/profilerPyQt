@@ -122,9 +122,7 @@ class QueryApp(QMainWindow, UiTheme):
         self.line_edit_search.setPlaceholderText("Найти")
         self.line_edit_search.setFixedWidth(300)
         self.line_edit_search.setToolTip(
-            "[Ctrl+F] - По умолчанию поиск происходит по колонке [pg_stat_statements_query]\n"
-            "Если в начало строки ввести [pa_]<Строка которую нужно найти> - поиск произойдет по строке [pg_stat_activity_query]\n"
-            "Если в начало строки ввести [all_]<Строка которую нужно найти> - поиск произойдет по строке обоим колонкам [pg_stat_statements_query_text, pg_stat_activity_query_text]")
+            "[Ctrl+F] - Поиск происходит динамически при вводе текста\n")
 
         # Добавьте рамку, чтобы улучшить внешний вид поля поиска.
         search_frame = QFrame(self)
@@ -232,10 +230,10 @@ class QueryApp(QMainWindow, UiTheme):
         UiTheme.set_icon_and_tooltip(self.btn_check_updates, "icons/update_check.ico",
                                      f"Проверьте наличие обновлений")
 
-        self.btn_update = QPushButton(self, "Скачать", self.layout)
+        self.btn_update = QPushButton(self, self.layout)
         self.btn_update.clicked.connect(self.loading_file)
-        self.btn_update.setVisible(False)  # Hide the button initially
         self.btn_update.setObjectName("btn_update")
+        self.btn_update.setText("Скачать")
 
         UiTheme.set_icon_and_tooltip(self.btn_update, "icons/update.ico",
                                      f"Скачать")

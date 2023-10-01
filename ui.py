@@ -71,7 +71,8 @@ class QueryApp(QMainWindow, UiTheme):
 
         if self.is_custom_bar:
             self.setWindowFlags(Qt.FramelessWindowHint)
-
+        else:
+            self.setWindowTitle(f"Интерфейс для работы с pg_stat_statements v{version_app}")
         # Получение палитры окна
         palette = self.palette()
 

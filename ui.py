@@ -23,6 +23,7 @@ class QueryApp(QMainWindow, UiTheme):
 
     def __init__(self):
         super().__init__()
+        self.is_custom_bar = False
         self.btn_check_updates = None
         self.btn_update = None
         self.btn_execute_top_20_query = None
@@ -64,7 +65,12 @@ class QueryApp(QMainWindow, UiTheme):
         self.default_port = None
         self.default_username = None
         self.default_password = None
-        self.setWindowFlags(Qt.FramelessWindowHint)
+
+        is_bar = ConnectionSettings.get_custom_bar()
+        self.is_custom_bar = is_bar
+
+        if self.is_custom_bar:
+            self.setWindowFlags(Qt.FramelessWindowHint)
 
         # Получение палитры окна
         palette = self.palette()
@@ -110,10 +116,11 @@ class QueryApp(QMainWindow, UiTheme):
         """
         layout = QVBoxLayout()
         UiTheme.set_dark_theme(self)
-        version_app_value = version_app.replace("\n", "")
-        title_text = f"Интерфейс для работы с pg_stat_statements v{version_app_value}"
-        bar = Bar(self, title_text)
-        self.setMenuWidget(bar)
+        if self.is_custom_bar:
+            version_app_value = version_app.replace("\n", "")
+            title_text = f"Интерфейс для работы с pg_stat_statements v{version_app_value}"
+            bar = Bar(self, title_text)
+            self.setMenuWidget(bar)
         self.q_system_tray_icon_build()
         self.setting_input_fields()
 

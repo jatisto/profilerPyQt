@@ -24,6 +24,15 @@ class ConnectionSettings:
             return []
 
     @staticmethod
+    def get_custom_bar():
+        try:
+            with open('settings.json', 'r', encoding='utf-8') as json_file:
+                data = json.load(json_file)
+                return data.get('custom_bar', False)
+        except FileNotFoundError:
+            return False
+
+    @staticmethod
     def load_json(name_file, root_element):
         try:
             with open(name_file, "r") as json_file:

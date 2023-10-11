@@ -1,15 +1,15 @@
 class Constants:
     table_columns_default = [
-        "запрос",
-        "затронутые строки",
-        "кол. вызовов",
-        "общее время выполнения",
-        "общие блоки прочитаны",
-        "написаны общие блоки",
-        "чтение локальных блоков",
-        "локальные блоки написаны",
-        "время начала запроса",
-        "время начала серверной части"
+        "query",
+        "rows",
+        "calls",
+        "total_exec_time",
+        "shared_blks_read",
+        "shared_blks_written",
+        "local_blks_read",
+        "local_blks_written",
+        "query_start",
+        "backend_start"
     ]
     table_columns_ins_upt_del = [
         "имя таблицы",
@@ -95,9 +95,9 @@ def get_search_query(dbname_str, like_str):
                     pg.rows AS affected_rows,							-- Количество строк, затронутых запросом.
                     pg.calls AS query_calls, 							-- Количество вызовов данного запроса.                   
                     pg.total_exec_time AS total_execution_time, 		-- Общее время выполнения запроса.
-                    pg.shared_blks_read AS shared_blocks_read, 			-- Количество считанных разделяемых блоков.
-                    pg.shared_blks_written AS shared_blocks_written, 	-- Количество записанных разделяемых блоков.
-                    pg.local_blks_read AS local_blocks_read, 			-- Количество считанных локальных блоков.
+                    pg.shared_blks_read AS shared_blocks_read, 			-- Количество чтений блоков.
+                    pg.shared_blks_written AS shared_blocks_written, 	-- Количество записанных блоков.
+                    pg.local_blks_read AS local_blocks_read, 			-- Количество чтений локальных блоков.
                     pg.local_blks_written AS local_blocks_written, 		-- Количество записанных локальных блоков.
                     pa.query_start AS query_start_time, 				-- Время начала выполнения запроса.
                     pa.backend_start AS backend_start_time 			    -- Время старта бэкенд-процесса, выполнившего запрос.

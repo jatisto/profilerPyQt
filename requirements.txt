@@ -1,6 +1,50 @@
-constants~=0.6.0
-psycopg2~=2.9.5
-psutil~=5.9.5
-requests~=2.31.0
-PySide2~=5.15.2.1
-pyuac~=0.0.3
+# Core GUI Framework - Updated to PySide6 (Qt 6)
+PySide6>=7.1.3
+
+# PostgreSQL Driver - Updated to psycopg3 with async support
+psycopg[binary,pool]>=3.2.0
+
+# Security - Password encryption and secure storage
+cryptography>=42.0.0
+keyring>=25.0.0
+
+# HTTP Client - Updated
+requests>=2.32.3
+httpx>=0.27.0  # Modern async HTTP client
+
+# System utilities
+psutil>=6.0.0
+
+# Configuration management
+python-dotenv>=1.0.0
+pydantic>=2.10.6
+pydantic-settings>=2.5.0
+
+# Logging and monitoring
+loguru>=0.7.2
+
+# Internationalization (i18n)
+babel>=2.16.0
+
+# Code quality and formatting
+black>=24.10.0
+ruff>=0.7.0
+
+# Testing
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
+pytest-qt>=4.4.0
+pytest-cov>=6.0.0
+
+# Type checking
+mypy>=1.13.0
+types-requests>=2.32.0
+
+# Development tools
+pre-commit>=4.0.0
+
+# Windows UAC support (optional)
+pyuac>=0.0.4; sys_platform == 'win32'
+
+# Material Design components
+qt-material>=2.14
